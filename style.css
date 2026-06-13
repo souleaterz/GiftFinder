@@ -1195,14 +1195,34 @@ a {
 .gift-card__media {
   position: relative;
   height: 152px;
-  background: var(--ink-soft);
   overflow: hidden;
   display: grid;
   place-items: center;
-  border-bottom: 1px solid var(--line-on-dark-soft);
+  border-bottom: 1px solid var(--line-on-paper);
 }
-.gift-card__media::after {
-  /* subtle top gradient so badges stay legible over photos */
+.gift-card__media--studio {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(216, 173, 99, 0.16), transparent 65%),
+    linear-gradient(180deg, #ffffff 0%, var(--paper-deep) 100%);
+}
+.gift-card__media--studio::after {
+  /* soft shadow under the product, like studio photography */
+  content: "";
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  width: 92px;
+  height: 16px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(29, 43, 38, 0.18), transparent 75%);
+  filter: blur(1px);
+}
+.gift-card__media--photo {
+  background: var(--ink-soft);
+  border-bottom-color: var(--line-on-dark-soft);
+}
+.gift-card__media--photo::before {
+  /* gradient so badges stay legible over photos */
   content: "";
   position: absolute;
   inset: 0;
@@ -1211,34 +1231,20 @@ a {
   pointer-events: none;
 }
 .gift-card__medallion {
-  display: none;
+  display: grid;
   place-items: center;
+  position: relative;
+  z-index: 1;
   width: 76px;
   height: 76px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 28%, #fff, var(--brass-pale) 75%);
   border: 1.5px solid var(--brass);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35), inset 0 0 0 4px rgba(255, 255, 255, 0.35);
-}
-.gift-card__media.no-img {
-  background:
-    radial-gradient(circle at 50% 38%, rgba(216, 173, 99, 0.16), transparent 60%),
-    repeating-linear-gradient(
-      135deg,
-      rgba(247, 241, 230, 0.025) 0px,
-      rgba(247, 241, 230, 0.025) 1px,
-      transparent 1px,
-      transparent 14px
-    ),
-    var(--ink-soft);
-}
-.gift-card__media.no-img .gift-card__medallion {
-  display: grid;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22), inset 0 0 0 4px rgba(255, 255, 255, 0.45);
 }
 .gift-card__icon {
-  font-size: 1.9rem;
+  font-size: 2.6rem;
   line-height: 1;
-  filter: saturate(0.85);
 }
 .gift-card__category {
   margin: 0 0 6px;
@@ -1265,24 +1271,32 @@ a {
   top: 12px;
   left: 12px;
   z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink-text);
+  border: 1px solid var(--line-on-paper);
   border-radius: var(--r-pill);
-  padding: 5px 13px;
+  padding: 5px 13px 5px 10px;
   font-family: var(--font-label);
   font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  border: 1px solid;
+  box-shadow: var(--shadow-soft);
 }
-.gift-card__retailer--amazon {
-  background: rgba(247, 241, 230, 0.06);
-  border-color: var(--line-on-dark);
-  color: var(--brass-pale);
+.gift-card__retailer::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
 }
-.gift-card__retailer--etsy {
-  background: rgba(147, 179, 153, 0.14);
-  border-color: rgba(147, 179, 153, 0.4);
-  color: var(--sage);
+.gift-card__retailer--amazon::before {
+  background: var(--ink);
+}
+.gift-card__retailer--etsy::before {
+  background: var(--sage);
 }
 .gift-card__price {
   position: absolute;
@@ -1355,6 +1369,16 @@ a {
   flex-wrap: wrap;
   justify-content: center;
   gap: 14px;
+}
+.results__more {
+  margin-top: 28px;
+  text-align: center;
+}
+.results__more-note {
+  margin: 14px auto 0;
+  max-width: 420px;
+  color: var(--muted-on-dark);
+  font-size: 0.92rem;
 }
 
 /* Toast */
