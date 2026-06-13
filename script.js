@@ -1,5 +1,5 @@
 /* =========================================================
-   Gift Guide — script.js
+   Givter — script.js
    Quiz flow + Personalised Gift Finder (Smart Matching Engine)
    ========================================================= */
 
@@ -928,10 +928,10 @@
     { title: "Genuine Leather Wallet", retailer: "amazon", price: 29.99, icon: "👛",
       hobby: ["fashion"], persona: ["minimalist"], aesthetic: ["vintage", "minimalist"], style: "practical", sentimental: false,
       desc: "A slim, full-grain leather wallet that ages beautifully with everyday use." },
-    { title: "Silk Scarf", retailer: "amazon", price: 24.99, icon: "🧣",
+    { title: "Silk Scarf", retailer: "amazon", price: 24.99, icon: "🧣", genders: ["women"],
       hobby: ["fashion"], persona: ["creative"], aesthetic: ["bold", "vintage"], style: "fun", sentimental: false,
       desc: "A luxuriously soft printed scarf that dresses up any outfit." },
-    { title: "Jewellery Organiser Box", retailer: "amazon", price: 19.99, icon: "💍",
+    { title: "Jewellery Organiser Box", retailer: "amazon", price: 19.99, icon: "💍", genders: ["women"],
       hobby: ["fashion"], persona: ["minimalist"], aesthetic: ["minimalist", "cosy"], style: "practical", sentimental: false,
       desc: "A velvet-lined case that keeps rings, necklaces and earrings tangle-free." },
     { title: "Self-Watering Herb Garden Kit", retailer: "amazon", price: 38.99, icon: "🌿",
@@ -990,7 +990,7 @@
       desc: "A calming mist of essential oils to turn any room into a retreat." },
 
     // ===================== ETSY (20) =====================
-    { title: "Personalised Name Necklace", retailer: "etsy", price: 22.0, icon: "💛",
+    { title: "Personalised Name Necklace", retailer: "etsy", price: 22.0, icon: "💛", genders: ["women"],
       hobby: ["fashion"], persona: ["sentimental"], aesthetic: ["minimalist", "bold"], style: "sentimental", sentimental: true,
       desc: "A dainty, handmade necklace featuring their name in delicate lettering." },
     { title: "Custom Star Map Print", retailer: "etsy", price: 28.0, icon: "🌌",
@@ -1008,13 +1008,13 @@
     { title: "Engraved Wooden Cutting Board", retailer: "etsy", price: 28.0, icon: "🪵",
       hobby: ["cooking"], persona: ["sentimental", "foodie"], aesthetic: ["cosy", "vintage"], style: "sentimental", sentimental: true,
       desc: "A handsome oak board engraved with their name, a date, or a family recipe." },
-    { title: "Personalised Cufflinks", retailer: "etsy", price: 24.0, icon: "🎩",
+    { title: "Personalised Cufflinks", retailer: "etsy", price: 24.0, icon: "🎩", genders: ["men"],
       hobby: ["fashion"], persona: ["sentimental", "minimalist"], aesthetic: ["vintage"], style: "sentimental", sentimental: true,
       desc: "Engraved cufflinks with initials, coordinates, or a hidden handwritten note." },
     { title: "Custom Family Tree Print", retailer: "etsy", price: 26.0, icon: "🌳",
       hobby: ["art"], persona: ["sentimental"], aesthetic: ["vintage", "cosy"], style: "sentimental", sentimental: true,
       desc: "A hand-drawn family tree print personalised with names and dates." },
-    { title: "Birth Flower Necklace", retailer: "etsy", price: 20.0, icon: "🌷",
+    { title: "Birth Flower Necklace", retailer: "etsy", price: 20.0, icon: "🌷", genders: ["women"],
       hobby: ["fashion"], persona: ["sentimental"], aesthetic: ["minimalist", "bold"], style: "sentimental", sentimental: true,
       desc: "A delicate pendant featuring the flower associated with their birth month." },
     { title: "Personalised Recipe Blanket", retailer: "etsy", price: 45.0, icon: "🧶",
@@ -1047,7 +1047,7 @@
     { title: "Custom Enamel Pin", retailer: "etsy", price: 10.0, icon: "📌",
       hobby: ["art", "fashion"], persona: ["creative", "funny"], aesthetic: ["bold"], style: "fun", sentimental: false,
       desc: "A playful custom-designed enamel pin for a jacket, bag or pinboard." },
-    { title: "Birthstone Bracelet", retailer: "etsy", price: 28.0, icon: "💎",
+    { title: "Birthstone Bracelet", retailer: "etsy", price: 28.0, icon: "💎", genders: ["women"],
       hobby: ["fashion"], persona: ["sentimental"], aesthetic: ["minimalist", "bold"], style: "sentimental", sentimental: true,
       desc: "A delicate bracelet featuring their birthstone, handmade to order." },
     { title: "Foam Roller", retailer: "amazon", price: 19.99, icon: "🧘",
@@ -1104,7 +1104,7 @@
     { title: "Set of Magnetic Bookmarks", retailer: "amazon", price: 9.99, icon: "🔖",
       hobby: ["reading"], persona: ["bookish", "creative"], aesthetic: ["bold", "minimalist"], style: "fun", sentimental: false,
       desc: "A set of slim magnetic bookmarks in playful designs that never fall out." },
-    { title: "Canvas Library Tote Bag", retailer: "amazon", price: 14.99, icon: "👜",
+    { title: "Canvas Library Tote Bag", retailer: "amazon", price: 14.99, icon: "👜", genders: ["women"],
       hobby: ["reading"], persona: ["bookish", "minimalist"], aesthetic: ["minimalist", "eco"], style: "practical", sentimental: false,
       desc: "A sturdy canvas tote with room for a stack of books and a flask." },
     { title: "Monthly Book Subscription Box", retailer: "amazon", price: 29.99, icon: "📦",
@@ -1146,7 +1146,7 @@
     { title: "Classic Aviator Sunglasses", retailer: "amazon", price: 24.99, icon: "🕶️",
       hobby: ["fashion"], persona: ["creative"], aesthetic: ["vintage", "bold"], style: "fun", sentimental: false,
       desc: "Timeless aviators with UV protection and a comfortable fit." },
-    { title: "Canvas Tote Bag", retailer: "amazon", price: 14.99, icon: "👜",
+    { title: "Canvas Tote Bag", retailer: "amazon", price: 14.99, icon: "👜", genders: ["women"],
       hobby: ["fashion"], persona: ["minimalist"], aesthetic: ["minimalist", "eco"], style: "practical", sentimental: false,
       desc: "A durable everyday tote made from heavyweight organic cotton canvas." },
     { title: "Minimalist Analog Watch", retailer: "amazon", price: 49.99, icon: "⌚",
@@ -1224,7 +1224,7 @@
     { title: "Insulated Lunch Bag", retailer: "amazon", price: 17.99, icon: "🍱",
       hobby: [], persona: ["minimalist", "foodie"], aesthetic: ["minimalist", "eco"], style: "practical", sentimental: false,
       desc: "A smart, leak-proof lunch bag that keeps food fresh on the go." },
-    { title: "Personalised Embroidered Tote Bag", retailer: "etsy", price: 26.0, icon: "👜",
+    { title: "Personalised Embroidered Tote Bag", retailer: "etsy", price: 26.0, icon: "👜", genders: ["women"],
       hobby: ["fashion"], persona: ["sentimental"], aesthetic: ["cosy", "bold"], style: "sentimental", sentimental: true,
       desc: "A canvas tote embroidered with a name, initials or a small motif." },
     { title: "Monogrammed Towel Set", retailer: "etsy", price: 32.0, icon: "🛁",
@@ -1278,7 +1278,7 @@
     { title: "Custom Pet Bandana", retailer: "etsy", price: 12.0, icon: "🐶",
       hobby: ["pets"], persona: ["funny", "sentimental"], aesthetic: ["bold", "cosy"], style: "fun", sentimental: false,
       desc: "A reversible bandana with their pet's name, for walks and photos alike." },
-    { title: "Personalised Kids Name Necklace", retailer: "etsy", price: 18.0, icon: "💛",
+    { title: "Personalised Kids Name Necklace", retailer: "etsy", price: 18.0, icon: "💛", genders: ["women"],
       hobby: ["fashion"], persona: ["sentimental"], aesthetic: ["minimalist", "bold"], style: "sentimental", sentimental: true,
       desc: "A delicate name necklace, gentle on skin and sized for younger wearers." },
     { title: "Engraved Golf Ball Set", retailer: "etsy", price: 26.0, icon: "⛳",
@@ -1290,7 +1290,7 @@
     { title: "Personalised Recipe Card Box", retailer: "etsy", price: 28.0, icon: "🗃️",
       hobby: ["cooking"], persona: ["sentimental", "foodie"], aesthetic: ["cosy", "vintage"], style: "sentimental", sentimental: true,
       desc: "A wooden box with custom recipe cards, ready to fill with family favourites." },
-    { title: "Engraved Money Clip", retailer: "etsy", price: 22.0, icon: "💵",
+    { title: "Engraved Money Clip", retailer: "etsy", price: 22.0, icon: "💵", genders: ["men"],
       hobby: ["fashion"], persona: ["sentimental", "minimalist"], aesthetic: ["minimalist", "vintage"], style: "sentimental", sentimental: true,
       desc: "A slim metal money clip engraved with initials, a date or coordinates." },
     { title: "Personalised Yoga Mat", retailer: "etsy", price: 34.0, icon: "🧘",
@@ -1377,9 +1377,17 @@
       }
 
       var text = (g.title + " " + g.desc).toLowerCase();
-      var avoided = avoidWords.some(function (w) {
+      var avoidedByWord = avoidWords.some(function (w) {
         return text.indexOf(w) !== -1;
       });
+
+      var genderMismatch = false;
+      if (g.genders) {
+        if (ans.gender === "woman" && g.genders.indexOf("women") === -1) genderMismatch = true;
+        if (ans.gender === "man" && g.genders.indexOf("men") === -1) genderMismatch = true;
+      }
+
+      var avoided = avoidedByWord || genderMismatch;
       if (avoided) score -= 50;
 
       score += Math.random() * 0.6; // gentle variety between runs
@@ -1839,7 +1847,7 @@
   }
 
   /* Expose for console/testing */
-  window.GiftGuide = {
+  window.Givter = {
     generateGiftIdeas: generateGiftIdeas,
     localGiftMatcher: localGiftMatcher
   };
