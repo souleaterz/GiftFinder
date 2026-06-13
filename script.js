@@ -820,8 +820,10 @@
      results for the exact product name, so links never go dead even if a
      specific listing changes. Swap in your Associates tag / specific
      listing URLs as needed. */
+  var AMAZON_ASSOCIATES_TAG = "givter-21";
+
   function amazonSearch(title) {
-    return "https://www.amazon.co.uk/s?k=" + encodeURIComponent(title);
+    return "https://www.amazon.co.uk/s?k=" + encodeURIComponent(title) + "&tag=" + AMAZON_ASSOCIATES_TAG;
   }
   function etsySearch(title) {
     return "https://www.etsy.com/search?q=" + encodeURIComponent(title);
