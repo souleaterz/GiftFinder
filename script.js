@@ -30,7 +30,9 @@
         { value: "friend", label: "Friend", icon: "🤝" },
         { value: "parent", label: "Parent", icon: "🏡" },
         { value: "sibling", label: "Sibling", icon: "🧩" },
-        { value: "coworker", label: "Coworker", icon: "💼" }
+        { value: "coworker", label: "Coworker", icon: "💼" },
+        { value: "son", label: "Son", icon: "👦" },
+        { value: "daughter", label: "Daughter", icon: "👧" }
       ]
     },
     {
@@ -166,8 +168,54 @@
       ]
     },
     {
-      id: "avoid",
+      id: "living",
       kicker: "Step 11",
+      title: "Where do they live?",
+      subtitle: "Helps match gifts to their space and lifestyle.",
+      type: "single",
+      optional: true,
+      options: [
+        { value: "city-flat", label: "City flat / apartment", icon: "🏙️" },
+        { value: "house", label: "House with garden", icon: "🏡" },
+        { value: "student", label: "Student / shared house", icon: "🎓" },
+        { value: "countryside", label: "Rural / countryside", icon: "🌾" }
+      ]
+    },
+    {
+      id: "techcomfort",
+      kicker: "Step 12",
+      title: "How comfortable are they with technology?",
+      subtitle: "Skip if you're not sure.",
+      type: "single",
+      optional: true,
+      options: [
+        { value: "loves-tech", label: "Total tech enthusiast", icon: "💻" },
+        { value: "comfortable", label: "Comfortable with tech", icon: "📱" },
+        { value: "basic", label: "Keeps it simple", icon: "📟" },
+        { value: "avoids", label: "Prefers non-tech gifts", icon: "📖" }
+      ]
+    },
+    {
+      id: "gifthistory",
+      kicker: "Step 13",
+      title: "What kinds of gifts have gone down well before?",
+      subtitle: "Optional — skip if you're not sure.",
+      type: "multi",
+      optional: true,
+      options: [
+        { value: "experiences", label: "Experiences & days out", icon: "🎟️" },
+        { value: "homewares", label: "Home & kitchen", icon: "🏠" },
+        { value: "clothing", label: "Clothing & accessories", icon: "👕" },
+        { value: "food-drink", label: "Food & drink", icon: "🍷" },
+        { value: "books-media", label: "Books, films & music", icon: "🎵" },
+        { value: "gadgets", label: "Gadgets & tech", icon: "🔌" },
+        { value: "spa-wellness", label: "Spa & wellness", icon: "🧖" },
+        { value: "games-fun", label: "Games & fun stuff", icon: "🎲" }
+      ]
+    },
+    {
+      id: "avoid",
+      kicker: "Step 14",
       title: "Anything to steer clear of?",
       subtitle: "Optional — allergies, things they already have plenty of, no-gos.",
       type: "text",
@@ -299,6 +347,11 @@
 
     var card = el("div", { class: "q-card q-anim" });
 
+    // Add skip button for optional questions
+    var skipHtml = q.optional
+      ? '<button class="q-skip-btn" type="button" id="q-skip">Skip this question →</button>'
+      : "";
+
     card.appendChild(el("p", { class: "q-kicker" }, escapeHtml(q.kicker)));
     card.appendChild(el("h2", { class: "q-title" }, escapeHtml(q.title)));
     if (q.subtitle) {
@@ -315,6 +368,23 @@
 
     qHost.innerHTML = "";
     qHost.appendChild(card);
+
+    // Wire skip button if this question is optional
+    if (q.optional) {
+      var skipBtn = el("button", { class: "q-skip-btn", type: "button" }, "Skip this question →");
+      skipBtn.addEventListener("click", function () {
+        // Set a null/empty sentinel so validAnswers still works
+        if (q.type === "multi") {
+          answers[q.id] = answers[q.id] || [];
+        } else if (q.type === "text") {
+          answers[q.id] = answers[q.id] || "";
+        } else {
+          answers[q.id] = answers[q.id] || "";
+        }
+        goNext();
+      });
+      card.appendChild(skipBtn);
+    }
   }
 
   /* ---- Single-select question: tap to auto-advance ---- */
@@ -648,6 +718,9 @@
     var interests = labelsFor("hobby", ans.hobby) || "Not specified";
     var aesthetic = labelFor("aesthetic", ans.aesthetic);
     var style = labelFor("style", ans.style);
+    var living = labelFor("living", ans.living) || "";
+    var techcomfort = labelFor("techcomfort", ans.techcomfort) || "";
+    var gifthistory = labelsFor("gifthistory", ans.gifthistory) || "";
     var avoid = (ans.avoid || "").trim();
 
     var lines = [
@@ -663,6 +736,9 @@
       "- Style / aesthetic: " + aesthetic,
       "- Gift preference: " + style
     ];
+    if (living) lines.push("- Living situation: " + living);
+    if (techcomfort) lines.push("- Tech comfort level: " + techcomfort);
+    if (gifthistory) lines.push("- Gift types that have worked before: " + gifthistory);
     if (avoid) {
       lines.push("- Avoid: " + avoid);
     }
@@ -841,480 +917,752 @@
   var BUDGET_FIT_SCORES = [3, 1.2, -0.5, -2];
 
   var PRODUCT_POOL = [
-    // ===================== AMAZON (50) =====================
+    // ===================== AMAZON — GYM & FITNESS =====================
     { title: "Adjustable Resistance Bands Set", retailer: "amazon", price: 21.99, icon: "🏋️",
       hobby: ["gym"], persona: ["outdoorsy"], aesthetic: ["minimalist", "eco"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling"],
       desc: "A stackable set of resistance bands for strength training, mobility and travel workouts." },
     { title: "Premium Non-Slip Yoga Mat", retailer: "amazon", price: 27.99, icon: "🧘",
       hobby: ["gym"], persona: ["introvert", "outdoorsy"], aesthetic: ["minimalist", "eco"], style: "practical", sentimental: false,
+      ages: ["teen", "adult", "senior"], recipients: ["partner", "friend", "parent", "sibling"],
       desc: "An extra-thick, grippy mat that makes home yoga and floor work far more comfortable." },
     { title: "Smart Insulated Water Bottle", retailer: "amazon", price: 32.99, icon: "🚰",
       hobby: ["gym", "travel"], persona: ["techy", "outdoorsy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling", "coworker"],
       desc: "Keeps drinks cold for 24 hours and glows to remind them to hit their hydration goal." },
     { title: "Mini Percussion Massage Gun", retailer: "amazon", price: 44.99, icon: "💪",
       hobby: ["gym"], persona: ["outdoorsy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "sibling"],
       desc: "A compact deep-tissue massager for easing sore muscles after training." },
-    { title: "Mechanical RGB Gaming Keyboard", retailer: "amazon", price: 59.99, icon: "⌨️",
-      hobby: ["gaming"], persona: ["techy"], aesthetic: ["bold"], style: "practical", sentimental: false,
-      desc: "Tactile switches and customisable backlighting for faster, more satisfying play." },
-    { title: "Wireless Gaming Headset", retailer: "amazon", price: 54.99, icon: "🎧",
-      hobby: ["gaming", "music"], persona: ["techy"], aesthetic: ["bold", "minimalist"], style: "practical", sentimental: false,
-      desc: "Clear chat audio and immersive sound for long gaming sessions, wire-free." },
-    { title: "Retro Mini Arcade Console", retailer: "amazon", price: 64.99, icon: "🕹️",
-      hobby: ["gaming"], persona: ["funny"], aesthetic: ["vintage", "bold"], style: "fun", sentimental: false,
-      desc: "A pocket-sized arcade pre-loaded with hundreds of classic games and a real joystick." },
-    { title: "Ambient RGB Light Bar", retailer: "amazon", price: 24.99, icon: "💡",
-      hobby: ["gaming", "music"], persona: ["creative", "techy"], aesthetic: ["bold"], style: "fun", sentimental: false,
-      desc: "Reactive desk lighting that syncs to music or screens and sets the mood." },
-    { title: "Professional Chef's Knife", retailer: "amazon", price: 34.99, icon: "🔪",
-      hobby: ["cooking"], persona: ["foodie"], aesthetic: ["minimalist", "vintage"], style: "practical", sentimental: false,
-      desc: "A balanced, razor-sharp blade that makes everyday prep feel effortless." },
-    { title: "Fresh Pasta Maker Machine", retailer: "amazon", price: 39.99, icon: "🍝",
-      hobby: ["cooking"], persona: ["creative", "foodie"], aesthetic: ["cosy", "vintage"], style: "fun", sentimental: false,
-      desc: "Roll, cut and shape restaurant-style pasta at home in minutes." },
-    { title: "Mini Air Fryer", retailer: "amazon", price: 49.99, icon: "🍟",
-      hobby: ["cooking"], persona: ["foodie"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
-      desc: "A compact countertop air fryer for crisp, low-oil cooking in small kitchens." },
-    { title: "Electric Burr Coffee Grinder", retailer: "amazon", price: 27.99, icon: "☕",
-      hobby: ["cooking"], persona: ["foodie"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
-      desc: "Freshly ground beans every morning, with adjustable settings for any brew method." },
-    { title: "Packing Cubes Travel Set", retailer: "amazon", price: 22.99, icon: "🧳",
-      hobby: ["travel"], persona: ["minimalist"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
-      desc: "Colour-coded cubes that turn any suitcase into a tidy, organised carry-on." },
-    { title: "Memory Foam Travel Pillow", retailer: "amazon", price: 17.99, icon: "😴",
-      hobby: ["travel"], persona: [], aesthetic: ["minimalist", "cosy"], style: "practical", sentimental: false,
-      desc: "Proper neck support for flights, trains and long car journeys." },
-    { title: "Anti-Theft Travel Backpack", retailer: "amazon", price: 44.99, icon: "🎒",
-      hobby: ["travel"], persona: ["adventurous", "techy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
-      desc: "Hidden zips and a USB charging port make this a smart everyday travel companion." },
-    { title: "Universal Travel Adapter", retailer: "amazon", price: 15.99, icon: "🔌",
-      hobby: ["travel"], persona: ["techy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
-      desc: "One compact adapter that works in over 150 countries, with built-in USB ports." },
-    { title: "LED Rechargeable Book Light", retailer: "amazon", price: 11.99, icon: "🔆",
-      hobby: ["reading"], persona: ["introvert", "bookish"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
-      desc: "A warm, clip-on glow for late chapters without disturbing anyone else." },
-    { title: "Kindle Paperwhite E-reader", retailer: "amazon", price: 139.99, icon: "📱",
-      hobby: ["reading"], persona: ["bookish", "minimalist"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
-      desc: "A glare-free, waterproof e-reader that holds thousands of books in your pocket." },
-    { title: "Cosy Reading Pillow with Arms", retailer: "amazon", price: 24.99, icon: "📚",
-      hobby: ["reading"], persona: ["introvert", "bookish"], aesthetic: ["cosy"], style: "fun", sentimental: false,
-      desc: "A backrest pillow built for long, comfortable reading sessions in bed." },
-    { title: "Audiobook Membership Gift Card", retailer: "amazon", price: 44.99, icon: "🎧",
-      hobby: ["reading", "travel"], persona: ["bookish"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
-      desc: "Months of audiobooks to enjoy on commutes, walks and road trips." },
-    { title: "True Wireless Earbuds", retailer: "amazon", price: 39.99, icon: "🎵",
-      hobby: ["music", "gym", "travel"], persona: ["techy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
-      desc: "Compact, sweat-resistant earbuds with rich sound and all-day battery life." },
-    { title: "Portable Bluetooth Speaker", retailer: "amazon", price: 29.99, icon: "🔊",
-      hobby: ["music"], persona: ["funny", "creative"], aesthetic: ["bold"], style: "fun", sentimental: false,
-      desc: "A rugged, splash-proof speaker that's the life of any garden or kitchen gathering." },
-    { title: "Vinyl Record Player with Speakers", retailer: "amazon", price: 79.99, icon: "🎶",
-      hobby: ["music"], persona: ["creative"], aesthetic: ["vintage"], style: "fun", sentimental: false,
-      desc: "A retro-styled turntable with built-in speakers, ready to play straight out of the box." },
-    { title: "Mini Smart Projector", retailer: "amazon", price: 69.99, icon: "🎬",
-      hobby: ["movies", "gaming"], persona: ["techy"], aesthetic: ["minimalist"], style: "fun", sentimental: false,
-      desc: "Turns any wall into a big screen for movie nights, gaming or sports." },
-    { title: "Stovetop Popcorn Maker", retailer: "amazon", price: 19.99, icon: "🍿",
-      hobby: ["movies", "cooking"], persona: ["funny", "foodie"], aesthetic: ["vintage", "cosy"], style: "fun", sentimental: false,
-      desc: "Classic stovetop popcorn for an instant movie-night upgrade." },
-    { title: "Streaming Media Stick", retailer: "amazon", price: 39.99, icon: "📺",
-      hobby: ["movies"], persona: ["techy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
-      desc: "Plugs into any TV to bring every streaming app to the screen in seconds." },
-    { title: "Watercolour Paint Set", retailer: "amazon", price: 24.99, icon: "🎨",
-      hobby: ["art"], persona: ["creative"], aesthetic: ["cosy", "bold"], style: "fun", sentimental: false,
-      desc: "Artist-grade paints, brushes and paper for picking up a relaxing new hobby." },
-    { title: "Graphics Drawing Tablet", retailer: "amazon", price: 59.99, icon: "🖥️",
-      hobby: ["art", "photography"], persona: ["creative", "techy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
-      desc: "A pressure-sensitive pen tablet for digital art, design and photo editing." },
-    { title: "Calligraphy Pen Set", retailer: "amazon", price: 19.99, icon: "🖋️",
-      hobby: ["art"], persona: ["creative", "minimalist"], aesthetic: ["minimalist", "vintage"], style: "fun", sentimental: false,
-      desc: "Brush pens, guides and practice pads for beautiful modern lettering." },
-    { title: "Genuine Leather Wallet", retailer: "amazon", price: 29.99, icon: "👛",
-      hobby: ["fashion"], persona: ["minimalist"], aesthetic: ["vintage", "minimalist"], style: "practical", sentimental: false,
-      desc: "A slim, full-grain leather wallet that ages beautifully with everyday use." },
-    { title: "Silk Scarf", retailer: "amazon", price: 24.99, icon: "🧣", genders: ["women"],
-      hobby: ["fashion"], persona: ["creative"], aesthetic: ["bold", "vintage"], style: "fun", sentimental: false,
-      desc: "A luxuriously soft printed scarf that dresses up any outfit." },
-    { title: "Jewellery Organiser Box", retailer: "amazon", price: 19.99, icon: "💍", genders: ["women"],
-      hobby: ["fashion"], persona: ["minimalist"], aesthetic: ["minimalist", "cosy"], style: "practical", sentimental: false,
-      desc: "A velvet-lined case that keeps rings, necklaces and earrings tangle-free." },
-    { title: "Self-Watering Herb Garden Kit", retailer: "amazon", price: 38.99, icon: "🌿",
-      hobby: ["gardening", "cooking"], persona: ["outdoorsy", "foodie"], aesthetic: ["eco", "cosy"], style: "practical", sentimental: false,
-      desc: "A countertop kit that grows fresh herbs on a sunny windowsill year-round." },
-    { title: "Ergonomic Gardening Tool Set", retailer: "amazon", price: 24.99, icon: "🌱",
-      hobby: ["gardening"], persona: ["outdoorsy"], aesthetic: ["eco"], style: "practical", sentimental: false,
-      desc: "Comfort-grip tools that make borders, pots and beds a pleasure to tend." },
-    { title: "Digital Plant Moisture Meter", retailer: "amazon", price: 10.99, icon: "🪴",
-      hobby: ["gardening"], persona: ["techy", "outdoorsy"], aesthetic: ["eco", "minimalist"], style: "practical", sentimental: false,
-      desc: "A simple probe that tells them exactly when each plant needs water." },
-    { title: "Wi-Fi Pet Camera with Treat Dispenser", retailer: "amazon", price: 54.99, icon: "🐶",
-      hobby: ["pets"], persona: ["techy", "sentimental"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
-      desc: "Check in on (and treat!) their pet from anywhere via a phone app." },
-    { title: "Interactive Dog Puzzle Toy", retailer: "amazon", price: 14.99, icon: "🦴",
-      hobby: ["pets"], persona: ["outdoorsy"], aesthetic: ["cosy"], style: "fun", sentimental: false,
-      desc: "A treat-hiding puzzle that keeps an energetic dog entertained for hours." },
-    { title: "Cat Play Tunnel", retailer: "amazon", price: 18.99, icon: "🐱",
-      hobby: ["pets"], persona: ["funny"], aesthetic: ["bold", "cosy"], style: "fun", sentimental: false,
-      desc: "A crinkly, collapsible tunnel that's an instant hit with curious cats." },
-    { title: "Official Size Match Football", retailer: "amazon", price: 19.99, icon: "⚽",
-      hobby: ["sports"], persona: ["outdoorsy", "adventurous"], aesthetic: ["bold"], style: "fun", sentimental: false,
-      desc: "A durable, all-weather football for the park, garden or five-a-side." },
-    { title: "Fitness Tracker Watch", retailer: "amazon", price: 39.99, icon: "⌚",
-      hobby: ["sports", "gym"], persona: ["techy", "outdoorsy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
-      desc: "Tracks steps, heart rate, sleep and workouts, with smartphone notifications." },
-    { title: "Insulated Sports Water Bottle", retailer: "amazon", price: 21.99, icon: "🥤",
-      hobby: ["sports", "gym"], persona: ["outdoorsy"], aesthetic: ["bold", "minimalist"], style: "practical", sentimental: false,
-      desc: "A leak-proof bottle that keeps drinks cold through a full match or session." },
-    { title: "Instant Print Camera", retailer: "amazon", price: 79.99, icon: "📸",
-      hobby: ["photography", "travel"], persona: ["creative", "adventurous"], aesthetic: ["vintage", "bold"], style: "fun", sentimental: false,
-      desc: "Snap and print keepsake photos on the spot, retro-style." },
-    { title: "Lightweight Travel Tripod", retailer: "amazon", price: 24.99, icon: "📷",
-      hobby: ["photography"], persona: ["techy", "adventurous"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
-      desc: "A compact tripod that folds down small but holds steady for sharp shots." },
-    { title: "Camera Lens Cleaning Kit", retailer: "amazon", price: 13.99, icon: "🧹",
-      hobby: ["photography"], persona: ["techy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
-      desc: "Everything needed to keep lenses spotless and scratch-free." },
-    { title: "Cordless Screwdriver Set", retailer: "amazon", price: 34.99, icon: "🔩",
-      hobby: ["diy"], persona: ["techy", "minimalist"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
-      desc: "A precision screwdriver with interchangeable bits and USB-C charging." },
-    { title: "Multi-Tool Pocket Gadget", retailer: "amazon", price: 29.99, icon: "🛠️",
-      hobby: ["diy", "travel"], persona: ["outdoorsy", "minimalist"], aesthetic: ["minimalist", "eco"], style: "practical", sentimental: false,
-      desc: "A compact, sturdy multi-tool that's handy for fixes on the go." },
-    { title: "Wall-Mounted Tool Organiser", retailer: "amazon", price: 24.99, icon: "🧰",
-      hobby: ["diy"], persona: ["minimalist"], aesthetic: ["minimalist", "eco"], style: "practical", sentimental: false,
-      desc: "A pegboard-style organiser that keeps a workshop or shed tidy." },
-    { title: "Luxury Chocolate Gift Box", retailer: "amazon", price: 21.99, icon: "🍫",
-      hobby: ["cooking"], persona: ["foodie"], aesthetic: ["cosy", "bold"], style: "surprise", sentimental: false,
-      desc: "A curated selection of premium chocolates from small-batch makers." },
-    { title: "Scented Candle Gift Set", retailer: "amazon", price: 22.99, icon: "🕯️",
-      hobby: [], persona: ["introvert"], aesthetic: ["cosy", "minimalist"], style: "surprise", sentimental: false,
-      desc: "Three hand-poured candles in seasonal scents with a long, clean burn." },
-    { title: "Aromatherapy Essential Oil Diffuser", retailer: "amazon", price: 29.99, icon: "🌬️",
-      hobby: [], persona: ["introvert"], aesthetic: ["cosy", "eco"], style: "practical", sentimental: false,
-      desc: "A calming mist of essential oils to turn any room into a retreat." },
-
-    // ===================== ETSY (20) =====================
-    { title: "Personalised Name Necklace", retailer: "etsy", price: 22.0, icon: "💛", genders: ["women"],
-      hobby: ["fashion"], persona: ["sentimental"], aesthetic: ["minimalist", "bold"], style: "sentimental", sentimental: true,
-      desc: "A dainty, handmade necklace featuring their name in delicate lettering." },
-    { title: "Custom Star Map Print", retailer: "etsy", price: 28.0, icon: "🌌",
-      hobby: ["art"], persona: ["creative", "sentimental"], aesthetic: ["vintage", "minimalist"], style: "sentimental", sentimental: true,
-      desc: "The night sky from a date that matters, printed as framed wall art." },
-    { title: "Personalised Engraved Leather Wallet", retailer: "etsy", price: 35.0, icon: "👝",
-      hobby: ["fashion"], persona: ["sentimental", "minimalist"], aesthetic: ["vintage"], style: "sentimental", sentimental: true,
-      desc: "A handcrafted leather wallet engraved with their initials or a short message." },
-    { title: "Custom Illustrated Pet Portrait", retailer: "etsy", price: 32.0, icon: "🐾",
-      hobby: ["pets", "art"], persona: ["sentimental", "creative"], aesthetic: ["bold", "vintage"], style: "sentimental", sentimental: true,
-      desc: "A hand-illustrated portrait of their pet, made from a favourite photo." },
-    { title: "Personalised Photo Memory Book", retailer: "etsy", price: 30.0, icon: "📔",
-      hobby: ["photography", "travel"], persona: ["sentimental"], aesthetic: ["cosy", "vintage"], style: "sentimental", sentimental: true,
-      desc: "A beautifully printed photo book telling the story of shared memories." },
-    { title: "Engraved Wooden Cutting Board", retailer: "etsy", price: 28.0, icon: "🪵",
-      hobby: ["cooking"], persona: ["sentimental", "foodie"], aesthetic: ["cosy", "vintage"], style: "sentimental", sentimental: true,
-      desc: "A handsome oak board engraved with their name, a date, or a family recipe." },
-    { title: "Personalised Cufflinks", retailer: "etsy", price: 24.0, icon: "🎩", genders: ["men"],
-      hobby: ["fashion"], persona: ["sentimental", "minimalist"], aesthetic: ["vintage"], style: "sentimental", sentimental: true,
-      desc: "Engraved cufflinks with initials, coordinates, or a hidden handwritten note." },
-    { title: "Custom Family Tree Print", retailer: "etsy", price: 26.0, icon: "🌳",
-      hobby: ["art"], persona: ["sentimental"], aesthetic: ["vintage", "cosy"], style: "sentimental", sentimental: true,
-      desc: "A hand-drawn family tree print personalised with names and dates." },
-    { title: "Birth Flower Necklace", retailer: "etsy", price: 20.0, icon: "🌷", genders: ["women"],
-      hobby: ["fashion"], persona: ["sentimental"], aesthetic: ["minimalist", "bold"], style: "sentimental", sentimental: true,
-      desc: "A delicate pendant featuring the flower associated with their birth month." },
-    { title: "Personalised Recipe Blanket", retailer: "etsy", price: 45.0, icon: "🧶",
-      hobby: ["cooking"], persona: ["sentimental", "foodie"], aesthetic: ["cosy"], style: "sentimental", sentimental: true,
-      desc: "A soft woven blanket printed with a treasured family recipe, in their handwriting if you like." },
-    { title: "Custom Song Lyrics Print", retailer: "etsy", price: 24.0, icon: "🎼",
-      hobby: ["music", "art"], persona: ["sentimental", "creative"], aesthetic: ["minimalist", "vintage"], style: "sentimental", sentimental: true,
-      desc: "A meaningful lyric or sound-wave print from a song that matters to them." },
-    { title: "Personalised Leather Journal", retailer: "etsy", price: 26.0, icon: "📓",
-      hobby: ["reading", "art"], persona: ["sentimental", "bookish"], aesthetic: ["vintage", "cosy"], style: "sentimental", sentimental: true,
-      desc: "A hand-bound leather journal embossed with their name or initials." },
-    { title: "Engraved Whisky Glasses Set", retailer: "etsy", price: 32.0, icon: "🥃",
-      hobby: [], persona: ["sentimental", "foodie"], aesthetic: ["vintage"], style: "sentimental", sentimental: true,
-      desc: "A pair of glasses etched with initials, coordinates, or a special date." },
-    { title: "Custom Embroidered Hoodie", retailer: "etsy", price: 38.0, icon: "🧥",
-      hobby: ["fashion"], persona: ["sentimental"], aesthetic: ["cosy", "bold"], style: "sentimental", sentimental: true,
-      desc: "A cosy hoodie embroidered with a name, date, or in-joke." },
-    { title: "Personalised Phone Case", retailer: "etsy", price: 18.0, icon: "📱",
-      hobby: ["fashion", "photography"], persona: ["sentimental", "creative"], aesthetic: ["bold", "minimalist"], style: "sentimental", sentimental: true,
-      desc: "A custom-printed phone case featuring a photo, name or design of their choice." },
-    { title: "Custom Illustrated Couple Portrait", retailer: "etsy", price: 40.0, icon: "💑",
-      hobby: ["art"], persona: ["sentimental", "creative"], aesthetic: ["bold", "vintage"], style: "sentimental", sentimental: true,
-      desc: "A hand-drawn portrait capturing the two of you in a chosen scene or style." },
-    { title: "Memory Jar Kit with Prompt Cards", retailer: "etsy", price: 22.0, icon: "🫙",
-      hobby: [], persona: ["sentimental", "introvert"], aesthetic: ["cosy", "vintage"], style: "sentimental", sentimental: true,
-      desc: "A keepsake jar with prompt cards for notes, tickets and memories to open later." },
-    { title: "Personalised Engraved Keyring", retailer: "etsy", price: 14.0, icon: "🔑",
-      hobby: [], persona: ["sentimental", "minimalist"], aesthetic: ["minimalist"], style: "sentimental", sentimental: true,
-      desc: "A small everyday keepsake engraved with a name, date or short message." },
-    { title: "Custom Enamel Pin", retailer: "etsy", price: 10.0, icon: "📌",
-      hobby: ["art", "fashion"], persona: ["creative", "funny"], aesthetic: ["bold"], style: "fun", sentimental: false,
-      desc: "A playful custom-designed enamel pin for a jacket, bag or pinboard." },
-    { title: "Birthstone Bracelet", retailer: "etsy", price: 28.0, icon: "💎", genders: ["women"],
-      hobby: ["fashion"], persona: ["sentimental"], aesthetic: ["minimalist", "bold"], style: "sentimental", sentimental: true,
-      desc: "A delicate bracelet featuring their birthstone, handmade to order." },
     { title: "Foam Roller", retailer: "amazon", price: 19.99, icon: "🧘",
       hobby: ["gym"], persona: ["outdoorsy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "friend", "parent"],
       desc: "A firm foam roller for easing tight muscles after training." },
     { title: "Skipping Rope with Counter", retailer: "amazon", price: 12.99, icon: "🪢",
       hobby: ["gym"], persona: ["outdoorsy"], aesthetic: ["minimalist", "bold"], style: "fun", sentimental: false,
+      ages: ["child", "teen", "adult"], recipients: ["friend", "sibling", "son", "daughter"],
       desc: "A speed rope with a built-in counter for quick, effective cardio anywhere." },
     { title: "Padded Gym Gloves", retailer: "amazon", price: 14.99, icon: "🧤",
       hobby: ["gym"], persona: ["outdoorsy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling"],
       desc: "Breathable, padded gloves that protect hands during lifting sessions." },
     { title: "Protein Shaker Bottle Set", retailer: "amazon", price: 13.99, icon: "🥤",
       hobby: ["gym"], persona: ["outdoorsy", "foodie"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling"],
       desc: "Leak-proof shakers with a mixing ball, perfect for the gym bag." },
+
+    // ===================== AMAZON — GAMING =====================
+    { title: "Mechanical RGB Gaming Keyboard", retailer: "amazon", price: 59.99, icon: "⌨️",
+      hobby: ["gaming"], persona: ["techy"], aesthetic: ["bold"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling", "son", "daughter"],
+      desc: "Tactile switches and customisable backlighting for faster, more satisfying play." },
+    { title: "Wireless Gaming Headset", retailer: "amazon", price: 54.99, icon: "🎧",
+      hobby: ["gaming", "music"], persona: ["techy"], aesthetic: ["bold", "minimalist"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling", "son", "daughter"],
+      desc: "Clear chat audio and immersive sound for long gaming sessions, wire-free." },
+    { title: "Retro Mini Arcade Console", retailer: "amazon", price: 64.99, icon: "🕹️",
+      hobby: ["gaming"], persona: ["funny"], aesthetic: ["vintage", "bold"], style: "fun", sentimental: false,
+      ages: ["child", "teen", "adult"], recipients: ["partner", "friend", "sibling", "son", "daughter"],
+      desc: "A pocket-sized arcade pre-loaded with hundreds of classic games and a real joystick." },
+    { title: "Ambient RGB Light Bar", retailer: "amazon", price: 24.99, icon: "💡",
+      hobby: ["gaming", "music"], persona: ["creative", "techy"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling", "son", "daughter"],
+      desc: "Reactive desk lighting that syncs to music or screens and sets the mood." },
     { title: "Controller Charging Dock", retailer: "amazon", price: 18.99, icon: "🔌",
       hobby: ["gaming"], persona: ["techy"], aesthetic: ["minimalist", "bold"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling", "son", "daughter"],
       desc: "Keeps two controllers charged and ready, with LED status lights." },
     { title: "Memory Foam Gaming Chair Cushion", retailer: "amazon", price: 27.99, icon: "🪑",
       hobby: ["gaming"], persona: ["techy", "introvert"], aesthetic: ["cosy"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling"],
       desc: "A supportive cushion set that makes long sessions far more comfortable." },
     { title: "Extra-Large Desk Mouse Mat", retailer: "amazon", price: 16.99, icon: "🖱️",
       hobby: ["gaming"], persona: ["techy", "creative"], aesthetic: ["bold", "minimalist"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling", "son"],
       desc: "A full-desk mat that protects surfaces and gives mouse and keyboard room to roam." },
     { title: "Digital Game Store Gift Card", retailer: "amazon", price: 25.0, icon: "🎮",
       hobby: ["gaming"], persona: ["techy", "funny"], aesthetic: ["bold"], style: "surprise", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling", "son", "daughter"],
       desc: "Credit to spend on whatever they're currently excited to play." },
+
+    // ===================== AMAZON — COOKING =====================
+    { title: "Professional Chef's Knife", retailer: "amazon", price: 34.99, icon: "🔪",
+      hobby: ["cooking"], persona: ["foodie"], aesthetic: ["minimalist", "vintage"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "sibling"],
+      desc: "A balanced, razor-sharp blade that makes everyday prep feel effortless." },
+    { title: "Fresh Pasta Maker Machine", retailer: "amazon", price: 39.99, icon: "🍝",
+      hobby: ["cooking"], persona: ["creative", "foodie"], aesthetic: ["cosy", "vintage"], style: "fun", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "sibling"],
+      desc: "Roll, cut and shape restaurant-style pasta at home in minutes." },
+    { title: "Mini Air Fryer", retailer: "amazon", price: 49.99, icon: "🍟",
+      hobby: ["cooking"], persona: ["foodie"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "sibling", "friend"],
+      desc: "A compact countertop air fryer for crisp, low-oil cooking in small kitchens." },
+    { title: "Electric Burr Coffee Grinder", retailer: "amazon", price: 27.99, icon: "☕",
+      hobby: ["cooking"], persona: ["foodie"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "coworker", "friend"],
+      desc: "Freshly ground beans every morning, with adjustable settings for any brew method." },
     { title: "Sourdough Baking Kit", retailer: "amazon", price: 29.99, icon: "🍞",
       hobby: ["cooking"], persona: ["foodie", "creative"], aesthetic: ["cosy"], style: "fun", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "friend"],
       desc: "Everything needed to start a sourdough starter and bake the first loaf." },
     { title: "Cocktail Making Set", retailer: "amazon", price: 34.99, icon: "🍸",
       hobby: ["cooking"], persona: ["foodie", "funny"], aesthetic: ["bold", "vintage"], style: "fun", sentimental: false,
+      ages: ["adult"], recipients: ["partner", "friend", "sibling"],
       desc: "A bartender's kit with shaker, jigger, strainer and recipe booklet." },
     { title: "Tea Sampler Gift Box", retailer: "amazon", price: 18.99, icon: "🍵",
       hobby: ["cooking"], persona: ["foodie", "introvert"], aesthetic: ["cosy"], style: "surprise", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["parent", "coworker", "friend"],
       desc: "A selection of loose-leaf teas from around the world, beautifully boxed." },
     { title: "Professional Knife Sharpener", retailer: "amazon", price: 22.99, icon: "🔪",
       hobby: ["cooking"], persona: ["foodie"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["parent", "partner", "friend"],
       desc: "A simple pull-through sharpener that keeps kitchen knives razor-ready." },
     { title: "Ceramic Bakeware Set", retailer: "amazon", price: 44.99, icon: "🍰",
       hobby: ["cooking"], persona: ["foodie"], aesthetic: ["cosy", "minimalist"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "sibling"],
       desc: "A set of oven-to-table dishes for bakes, roasts and casseroles." },
+    { title: "Luxury Chocolate Gift Box", retailer: "amazon", price: 21.99, icon: "🍫",
+      hobby: ["cooking"], persona: ["foodie"], aesthetic: ["cosy", "bold"], style: "surprise", sentimental: false,
+      ages: ["child", "teen", "adult", "senior"], recipients: ["partner", "parent", "coworker", "friend"],
+      desc: "A curated selection of premium chocolates from small-batch makers." },
+
+    // ===================== AMAZON — TRAVEL =====================
+    { title: "Packing Cubes Travel Set", retailer: "amazon", price: 22.99, icon: "🧳",
+      hobby: ["travel"], persona: ["minimalist"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling", "coworker"],
+      desc: "Colour-coded cubes that turn any suitcase into a tidy, organised carry-on." },
+    { title: "Memory Foam Travel Pillow", retailer: "amazon", price: 17.99, icon: "😴",
+      hobby: ["travel"], persona: [], aesthetic: ["minimalist", "cosy"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "friend"],
+      desc: "Proper neck support for flights, trains and long car journeys." },
+    { title: "Anti-Theft Travel Backpack", retailer: "amazon", price: 44.99, icon: "🎒",
+      hobby: ["travel"], persona: ["adventurous", "techy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling"],
+      desc: "Hidden zips and a USB charging port make this a smart everyday travel companion." },
+    { title: "Universal Travel Adapter", retailer: "amazon", price: 15.99, icon: "🔌",
+      hobby: ["travel"], persona: ["techy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling", "coworker"],
+      desc: "One compact adapter that works in over 150 countries, with built-in USB ports." },
     { title: "Travel Document Organiser", retailer: "amazon", price: 16.99, icon: "🗂️",
       hobby: ["travel"], persona: ["minimalist"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "friend"],
       desc: "Keeps passports, tickets and cards together and easy to find at the gate." },
     { title: "Packable Rain Jacket", retailer: "amazon", price: 34.99, icon: "🧥",
       hobby: ["travel"], persona: ["outdoorsy", "adventurous"], aesthetic: ["minimalist", "eco"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling"],
       desc: "A lightweight jacket that folds into its own pocket for unpredictable weather." },
     { title: "Portable Power Bank Charger", retailer: "amazon", price: 24.99, icon: "🔋",
       hobby: ["travel"], persona: ["techy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling", "coworker"],
       desc: "A pocket-sized battery that keeps phones and earbuds going all day." },
     { title: "Leather Travel Journal", retailer: "amazon", price: 22.99, icon: "📓",
       hobby: ["travel"], persona: ["sentimental", "bookish"], aesthetic: ["vintage", "cosy"], style: "sentimental", sentimental: true,
+      ages: ["teen", "adult", "senior"], recipients: ["partner", "friend", "parent"],
       desc: "A refillable leather journal for trip notes, sketches and tickets." },
+
+    // ===================== AMAZON — READING =====================
+    { title: "LED Rechargeable Book Light", retailer: "amazon", price: 11.99, icon: "🔆",
+      hobby: ["reading"], persona: ["introvert", "bookish"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["child", "teen", "adult", "senior"], recipients: ["parent", "friend", "sibling", "son", "daughter"],
+      desc: "A warm, clip-on glow for late chapters without disturbing anyone else." },
+    { title: "Kindle Paperwhite E-reader", retailer: "amazon", price: 139.99, icon: "📱",
+      hobby: ["reading"], persona: ["bookish", "minimalist"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "friend"],
+      desc: "A glare-free, waterproof e-reader that holds thousands of books in your pocket." },
+    { title: "Cosy Reading Pillow with Arms", retailer: "amazon", price: 24.99, icon: "📚",
+      hobby: ["reading"], persona: ["introvert", "bookish"], aesthetic: ["cosy"], style: "fun", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "friend"],
+      desc: "A backrest pillow built for long, comfortable reading sessions in bed." },
+    { title: "Audiobook Membership Gift Card", retailer: "amazon", price: 44.99, icon: "🎧",
+      hobby: ["reading", "travel"], persona: ["bookish"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "friend", "coworker"],
+      desc: "Months of audiobooks to enjoy on commutes, walks and road trips." },
     { title: "Set of Magnetic Bookmarks", retailer: "amazon", price: 9.99, icon: "🔖",
       hobby: ["reading"], persona: ["bookish", "creative"], aesthetic: ["bold", "minimalist"], style: "fun", sentimental: false,
+      ages: ["child", "teen", "adult", "senior"], recipients: ["friend", "sibling", "coworker", "son", "daughter"],
       desc: "A set of slim magnetic bookmarks in playful designs that never fall out." },
-    { title: "Canvas Library Tote Bag", retailer: "amazon", price: 14.99, icon: "👜", genders: ["women"],
-      hobby: ["reading"], persona: ["bookish", "minimalist"], aesthetic: ["minimalist", "eco"], style: "practical", sentimental: false,
-      desc: "A sturdy canvas tote with room for a stack of books and a flask." },
     { title: "Monthly Book Subscription Box", retailer: "amazon", price: 29.99, icon: "📦",
       hobby: ["reading"], persona: ["bookish"], aesthetic: ["cosy"], style: "surprise", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling"],
       desc: "A surprise novel and bookish treats delivered every month." },
+
+    // ===================== AMAZON — MUSIC =====================
+    { title: "True Wireless Earbuds", retailer: "amazon", price: 39.99, icon: "🎵",
+      hobby: ["music", "gym", "travel"], persona: ["techy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling", "son", "daughter", "coworker"],
+      desc: "Compact, sweat-resistant earbuds with rich sound and all-day battery life." },
+    { title: "Portable Bluetooth Speaker", retailer: "amazon", price: 29.99, icon: "🔊",
+      hobby: ["music"], persona: ["funny", "creative"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling", "son", "daughter"],
+      desc: "A rugged, splash-proof speaker that's the life of any garden or kitchen gathering." },
+    { title: "Vinyl Record Player with Speakers", retailer: "amazon", price: 79.99, icon: "🎶",
+      hobby: ["music"], persona: ["creative"], aesthetic: ["vintage"], style: "fun", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "friend"],
+      desc: "A retro-styled turntable with built-in speakers, ready to play straight out of the box." },
     { title: "Clip-On Guitar Tuner", retailer: "amazon", price: 12.99, icon: "🎸",
       hobby: ["music"], persona: ["creative", "techy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling", "son", "daughter"],
       desc: "A simple clip-on tuner that keeps any stringed instrument in tune." },
     { title: "Harmonica", retailer: "amazon", price: 16.99, icon: "🎶",
       hobby: ["music"], persona: ["creative", "funny"], aesthetic: ["vintage", "bold"], style: "fun", sentimental: false,
+      ages: ["teen", "adult", "senior"], recipients: ["partner", "friend", "parent"],
       desc: "A classic blues harmonica, easy to pick up and surprisingly addictive." },
     { title: "Bluetooth Karaoke Microphone", retailer: "amazon", price: 32.99, icon: "🎤",
       hobby: ["music"], persona: ["funny", "creative"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["child", "teen", "adult"], recipients: ["friend", "sibling", "son", "daughter"],
       desc: "A portable mic with built-in speaker for instant living-room karaoke." },
+
+    // ===================== AMAZON — MOVIES & TV =====================
+    { title: "Mini Smart Projector", retailer: "amazon", price: 69.99, icon: "🎬",
+      hobby: ["movies", "gaming"], persona: ["techy"], aesthetic: ["minimalist"], style: "fun", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling"],
+      desc: "Turns any wall into a big screen for movie nights, gaming or sports." },
+    { title: "Stovetop Popcorn Maker", retailer: "amazon", price: 19.99, icon: "🍿",
+      hobby: ["movies", "cooking"], persona: ["funny", "foodie"], aesthetic: ["vintage", "cosy"], style: "fun", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "friend"],
+      desc: "Classic stovetop popcorn for an instant movie-night upgrade." },
+    { title: "Streaming Media Stick", retailer: "amazon", price: 39.99, icon: "📺",
+      hobby: ["movies"], persona: ["techy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "friend"],
+      desc: "Plugs into any TV to bring every streaming app to the screen in seconds." },
     { title: "Sleeved Hoodie Blanket", retailer: "amazon", price: 24.99, icon: "🛋️",
       hobby: ["movies"], persona: ["introvert"], aesthetic: ["cosy"], style: "fun", sentimental: false,
+      ages: ["teen", "adult", "senior"], recipients: ["partner", "parent", "friend", "sibling"],
       desc: "A giant, wearable blanket with sleeves and a pocket — built for movie marathons." },
     { title: "Film Reel Desk Lamp", retailer: "amazon", price: 27.99, icon: "💡",
       hobby: ["movies"], persona: ["creative", "sentimental"], aesthetic: ["vintage"], style: "sentimental", sentimental: true,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling"],
       desc: "A retro film-reel shaped lamp that throws a warm, nostalgic glow." },
-    { title: "Vintage Cinema Poster Print", retailer: "amazon", price: 19.99, icon: "🎞️",
-      hobby: ["movies"], persona: ["creative"], aesthetic: ["vintage"], style: "sentimental", sentimental: false,
-      desc: "A retro-style cinema print that adds character to any wall." },
+
+    // ===================== AMAZON — ART & CRAFTS =====================
+    { title: "Watercolour Paint Set", retailer: "amazon", price: 24.99, icon: "🎨",
+      hobby: ["art"], persona: ["creative"], aesthetic: ["cosy", "bold"], style: "fun", sentimental: false,
+      ages: ["child", "teen", "adult", "senior"], recipients: ["partner", "friend", "sibling", "son", "daughter", "parent"],
+      desc: "Artist-grade paints, brushes and paper for picking up a relaxing new hobby." },
+    { title: "Graphics Drawing Tablet", retailer: "amazon", price: 59.99, icon: "🖥️",
+      hobby: ["art", "photography"], persona: ["creative", "techy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling", "son", "daughter"],
+      desc: "A pressure-sensitive pen tablet for digital art, design and photo editing." },
+    { title: "Calligraphy Pen Set", retailer: "amazon", price: 19.99, icon: "🖋️",
+      hobby: ["art"], persona: ["creative", "minimalist"], aesthetic: ["minimalist", "vintage"], style: "fun", sentimental: false,
+      ages: ["teen", "adult", "senior"], recipients: ["partner", "friend", "parent"],
+      desc: "Brush pens, guides and practice pads for beautiful modern lettering." },
     { title: "Premium Sketchbook Set", retailer: "amazon", price: 17.99, icon: "📓",
       hobby: ["art"], persona: ["creative"], aesthetic: ["minimalist", "cosy"], style: "fun", sentimental: false,
+      ages: ["child", "teen", "adult"], recipients: ["friend", "sibling", "son", "daughter"],
       desc: "Heavyweight paper sketchbooks in a few sizes, ready for any medium." },
     { title: "Acrylic Paint Set", retailer: "amazon", price: 21.99, icon: "🎨",
       hobby: ["art"], persona: ["creative"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["child", "teen", "adult"], recipients: ["friend", "sibling", "son", "daughter"],
       desc: "A vibrant set of acrylics with brushes, ready for canvas or crafts." },
     { title: "Embroidery Starter Kit", retailer: "amazon", price: 18.99, icon: "🧵",
       hobby: ["art"], persona: ["creative"], aesthetic: ["cosy", "vintage"], style: "fun", sentimental: false,
+      ages: ["teen", "adult", "senior"], recipients: ["partner", "friend", "parent", "sibling"],
       desc: "Hoops, threads and patterns for a relaxing, screen-free hobby." },
     { title: "Polymer Clay Modelling Kit", retailer: "amazon", price: 19.99, icon: "🏺",
       hobby: ["art"], persona: ["creative"], aesthetic: ["bold", "eco"], style: "fun", sentimental: false,
+      ages: ["child", "teen", "adult"], recipients: ["friend", "sibling", "son", "daughter"],
       desc: "A colourful clay set for sculpting charms, dishes and small sculptures." },
+
+    // ===================== AMAZON — FASHION & STYLE =====================
+    { title: "Genuine Leather Wallet", retailer: "amazon", price: 29.99, icon: "👛",
+      hobby: ["fashion"], persona: ["minimalist"], aesthetic: ["vintage", "minimalist"], style: "practical", sentimental: false,
+      ages: ["adult"], recipients: ["partner", "parent", "sibling", "coworker"],
+      desc: "A slim, full-grain leather wallet that ages beautifully with everyday use." },
+    { title: "Silk Scarf", retailer: "amazon", price: 24.99, icon: "🧣", genders: ["women"],
+      hobby: ["fashion"], persona: ["creative"], aesthetic: ["bold", "vintage"], style: "fun", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "sibling", "friend"],
+      desc: "A luxuriously soft printed scarf that dresses up any outfit." },
+    { title: "Jewellery Organiser Box", retailer: "amazon", price: 19.99, icon: "💍", genders: ["women"],
+      hobby: ["fashion"], persona: ["minimalist"], aesthetic: ["minimalist", "cosy"], style: "practical", sentimental: false,
+      ages: ["teen", "adult", "senior"], recipients: ["partner", "parent", "sibling", "daughter"],
+      desc: "A velvet-lined case that keeps rings, necklaces and earrings tangle-free." },
     { title: "Ribbed Knit Beanie Hat", retailer: "amazon", price: 14.99, icon: "🧢",
       hobby: ["fashion"], persona: ["minimalist"], aesthetic: ["cosy", "minimalist"], style: "practical", sentimental: false,
+      ages: ["child", "teen", "adult"], recipients: ["friend", "sibling", "son", "daughter"],
       desc: "A soft, ribbed beanie that pairs with everything from autumn to spring." },
     { title: "Classic Aviator Sunglasses", retailer: "amazon", price: 24.99, icon: "🕶️",
       hobby: ["fashion"], persona: ["creative"], aesthetic: ["vintage", "bold"], style: "fun", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling"],
       desc: "Timeless aviators with UV protection and a comfortable fit." },
-    { title: "Canvas Tote Bag", retailer: "amazon", price: 14.99, icon: "👜", genders: ["women"],
-      hobby: ["fashion"], persona: ["minimalist"], aesthetic: ["minimalist", "eco"], style: "practical", sentimental: false,
-      desc: "A durable everyday tote made from heavyweight organic cotton canvas." },
     { title: "Minimalist Analog Watch", retailer: "amazon", price: 49.99, icon: "⌚",
       hobby: ["fashion"], persona: ["minimalist", "sentimental"], aesthetic: ["minimalist", "vintage"], style: "sentimental", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "sibling"],
       desc: "A clean-faced watch with a leather strap that suits any outfit." },
+
+    // ===================== AMAZON — GARDENING =====================
+    { title: "Self-Watering Herb Garden Kit", retailer: "amazon", price: 38.99, icon: "🌿",
+      hobby: ["gardening", "cooking"], persona: ["outdoorsy", "foodie"], aesthetic: ["eco", "cosy"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "friend"],
+      desc: "A countertop kit that grows fresh herbs on a sunny windowsill year-round." },
+    { title: "Ergonomic Gardening Tool Set", retailer: "amazon", price: 24.99, icon: "🌱",
+      hobby: ["gardening"], persona: ["outdoorsy"], aesthetic: ["eco"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["parent", "partner", "friend"],
+      desc: "Comfort-grip tools that make borders, pots and beds a pleasure to tend." },
+    { title: "Digital Plant Moisture Meter", retailer: "amazon", price: 10.99, icon: "🪴",
+      hobby: ["gardening"], persona: ["techy", "outdoorsy"], aesthetic: ["eco", "minimalist"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["parent", "partner", "friend"],
+      desc: "A simple probe that tells them exactly when each plant needs water." },
     { title: "Bonsai Tree Starter Kit", retailer: "amazon", price: 24.99, icon: "🌳",
       hobby: ["gardening"], persona: ["outdoorsy", "creative"], aesthetic: ["eco", "minimalist"], style: "fun", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["parent", "partner", "friend"],
       desc: "Everything needed to grow and shape a bonsai tree from seed." },
     { title: "Succulent Collection Set", retailer: "amazon", price: 22.99, icon: "🪴",
       hobby: ["gardening"], persona: ["outdoorsy"], aesthetic: ["eco", "minimalist"], style: "surprise", sentimental: false,
+      ages: ["teen", "adult", "senior"], recipients: ["partner", "parent", "friend", "coworker"],
       desc: "A set of easy-care succulents in matching pots, ready to display." },
     { title: "Wild Bird Feeder", retailer: "amazon", price: 19.99, icon: "🐦",
       hobby: ["gardening"], persona: ["outdoorsy"], aesthetic: ["eco"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["parent", "partner", "friend"],
       desc: "A weatherproof feeder that brings garden birds up close all year." },
+
+    // ===================== AMAZON — PETS =====================
+    { title: "Wi-Fi Pet Camera with Treat Dispenser", retailer: "amazon", price: 54.99, icon: "🐶",
+      hobby: ["pets"], persona: ["techy", "sentimental"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["adult"], recipients: ["partner", "parent", "friend", "sibling"],
+      desc: "Check in on (and treat!) their pet from anywhere via a phone app." },
+    { title: "Interactive Dog Puzzle Toy", retailer: "amazon", price: 14.99, icon: "🦴",
+      hobby: ["pets"], persona: ["outdoorsy"], aesthetic: ["cosy"], style: "fun", sentimental: false,
+      ages: ["adult"], recipients: ["partner", "parent", "friend"],
+      desc: "A treat-hiding puzzle that keeps an energetic dog entertained for hours." },
+    { title: "Cat Play Tunnel", retailer: "amazon", price: 18.99, icon: "🐱",
+      hobby: ["pets"], persona: ["funny"], aesthetic: ["bold", "cosy"], style: "fun", sentimental: false,
+      ages: ["adult"], recipients: ["partner", "parent", "friend", "sibling"],
+      desc: "A crinkly, collapsible tunnel that's an instant hit with curious cats." },
     { title: "Personalised Pet Food Bowl", retailer: "amazon", price: 16.99, icon: "🐕",
       hobby: ["pets"], persona: ["sentimental"], aesthetic: ["minimalist", "cosy"], style: "sentimental", sentimental: true,
+      ages: ["adult"], recipients: ["partner", "parent", "friend"],
       desc: "A ceramic bowl printed with their pet's name and a paw motif." },
     { title: "Dog Grooming Kit", retailer: "amazon", price: 27.99, icon: "🐩",
       hobby: ["pets"], persona: ["outdoorsy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["adult"], recipients: ["partner", "parent", "friend"],
       desc: "Clippers, brushes and nail trimmers for at-home grooming sessions." },
     { title: "Cat Scratching Post", retailer: "amazon", price: 34.99, icon: "🐈",
       hobby: ["pets"], persona: ["funny"], aesthetic: ["cosy", "bold"], style: "fun", sentimental: false,
+      ages: ["adult"], recipients: ["partner", "parent", "friend", "sibling"],
       desc: "A sisal-wrapped post and perch that saves furniture from curious claws." },
+
+    // ===================== AMAZON — SPORTS =====================
+    { title: "Official Size Match Football", retailer: "amazon", price: 19.99, icon: "⚽",
+      hobby: ["sports"], persona: ["outdoorsy", "adventurous"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["child", "teen", "adult"], recipients: ["friend", "sibling", "son", "daughter"],
+      desc: "A durable, all-weather football for the park, garden or five-a-side." },
+    { title: "Fitness Tracker Watch", retailer: "amazon", price: 39.99, icon: "⌚",
+      hobby: ["sports", "gym"], persona: ["techy", "outdoorsy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["teen", "adult", "senior"], recipients: ["partner", "parent", "friend", "sibling"],
+      desc: "Tracks steps, heart rate, sleep and workouts, with smartphone notifications." },
+    { title: "Insulated Sports Water Bottle", retailer: "amazon", price: 21.99, icon: "🥤",
+      hobby: ["sports", "gym"], persona: ["outdoorsy"], aesthetic: ["bold", "minimalist"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling", "son", "daughter"],
+      desc: "A leak-proof bottle that keeps drinks cold through a full match or session." },
     { title: "Set of Yoga Blocks", retailer: "amazon", price: 16.99, icon: "🧘",
       hobby: ["sports", "gym"], persona: ["introvert", "outdoorsy"], aesthetic: ["minimalist", "eco"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "friend"],
       desc: "Lightweight foam blocks that make yoga more accessible and comfortable." },
     { title: "Tennis Ball Set", retailer: "amazon", price: 9.99, icon: "🎾",
       hobby: ["sports"], persona: ["outdoorsy", "adventurous"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["child", "teen", "adult"], recipients: ["friend", "sibling", "son", "daughter"],
       desc: "A tube of high-quality balls ready for the court or a game of catch." },
     { title: "Padded Cycling Gloves", retailer: "amazon", price: 17.99, icon: "🚴",
       hobby: ["sports"], persona: ["outdoorsy", "adventurous"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling"],
       desc: "Shock-absorbing gloves that make longer rides more comfortable." },
     { title: "Anti-Fog Swim Goggles", retailer: "amazon", price: 12.99, icon: "🏊",
       hobby: ["sports"], persona: ["outdoorsy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["child", "teen", "adult"], recipients: ["friend", "sibling", "son", "daughter"],
       desc: "Comfortable, anti-fog goggles for pool laps or open water." },
+    { title: "Basketball", retailer: "amazon", price: 22.99, icon: "🏀",
+      hobby: ["sports"], persona: ["outdoorsy", "adventurous"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["child", "teen", "adult"], recipients: ["friend", "sibling", "son", "daughter"],
+      desc: "An official-feel rubber basketball ideal for outdoor courts or driveways." },
+    { title: "Table Tennis Set", retailer: "amazon", price: 19.99, icon: "🏓",
+      hobby: ["sports", "gaming"], persona: ["funny", "adventurous"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["child", "teen", "adult", "senior"], recipients: ["friend", "sibling", "parent", "son", "daughter"],
+      desc: "Portable clamp-on net, bats and balls for instant kitchen table ping-pong." },
+
+    // ===================== AMAZON — PHOTOGRAPHY =====================
+    { title: "Instant Print Camera", retailer: "amazon", price: 79.99, icon: "📸",
+      hobby: ["photography", "travel"], persona: ["creative", "adventurous"], aesthetic: ["vintage", "bold"], style: "fun", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling", "daughter"],
+      desc: "Snap and print keepsake photos on the spot, retro-style." },
+    { title: "Lightweight Travel Tripod", retailer: "amazon", price: 24.99, icon: "📷",
+      hobby: ["photography"], persona: ["techy", "adventurous"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling"],
+      desc: "A compact tripod that folds down small but holds steady for sharp shots." },
+    { title: "Camera Lens Cleaning Kit", retailer: "amazon", price: 13.99, icon: "🧹",
+      hobby: ["photography"], persona: ["techy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling"],
+      desc: "Everything needed to keep lenses spotless and scratch-free." },
     { title: "Mini Photo Printer", retailer: "amazon", price: 69.99, icon: "🖼️",
       hobby: ["photography"], persona: ["creative", "techy"], aesthetic: ["minimalist", "bold"], style: "fun", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling"],
       desc: "Prints phone photos instantly on credit-card sized sticky paper." },
     { title: "Padded Camera Strap", retailer: "amazon", price: 16.99, icon: "📷",
       hobby: ["photography"], persona: ["creative", "adventurous"], aesthetic: ["vintage", "minimalist"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling"],
       desc: "A comfortable strap that takes the strain out of long shoot days." },
-    { title: "Lens Filter Kit", retailer: "amazon", price: 24.99, icon: "🔍",
-      hobby: ["photography"], persona: ["techy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
-      desc: "A set of UV, polarising and ND filters for sharper, more creative shots." },
-    { title: "Label Maker", retailer: "amazon", price: 24.99, icon: "🏷️",
-      hobby: ["diy"], persona: ["minimalist", "techy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
-      desc: "A compact label printer that makes organising anything satisfying." },
-    { title: "Hot Glue Gun Kit", retailer: "amazon", price: 14.99, icon: "🔥",
-      hobby: ["diy"], persona: ["creative"], aesthetic: ["bold", "eco"], style: "fun", sentimental: false,
-      desc: "A glue gun with a rainbow of glue sticks for crafts and quick fixes." },
+
+    // ===================== AMAZON — DIY & TOOLS =====================
+    { title: "Cordless Screwdriver Set", retailer: "amazon", price: 34.99, icon: "🔩",
+      hobby: ["diy"], persona: ["techy", "minimalist"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "sibling"],
+      desc: "A precision screwdriver with interchangeable bits and USB-C charging." },
+    { title: "Multi-Tool Pocket Gadget", retailer: "amazon", price: 29.99, icon: "🛠️",
+      hobby: ["diy", "travel"], persona: ["outdoorsy", "minimalist"], aesthetic: ["minimalist", "eco"], style: "practical", sentimental: false,
+      ages: ["adult"], recipients: ["partner", "parent", "sibling", "son"],
+      desc: "A compact, sturdy multi-tool that's handy for fixes on the go." },
+    { title: "Wall-Mounted Tool Organiser", retailer: "amazon", price: 24.99, icon: "🧰",
+      hobby: ["diy"], persona: ["minimalist"], aesthetic: ["minimalist", "eco"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent"],
+      desc: "A pegboard-style organiser that keeps a workshop or shed tidy." },
     { title: "Soldering Iron Kit", retailer: "amazon", price: 27.99, icon: "🔧",
       hobby: ["diy"], persona: ["techy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
-      desc: "A temperature-controlled iron with tips and solder for electronics projects." },
-    { title: "1000-Piece Jigsaw Puzzle", retailer: "amazon", price: 13.99, icon: "🧩",
-      hobby: [], persona: ["introvert", "bookish"], aesthetic: ["cosy", "vintage"], style: "fun", sentimental: false,
-      desc: "A beautifully illustrated puzzle for slow, screen-free evenings." },
-    { title: "Strategy Board Game", retailer: "amazon", price: 29.99, icon: "🎲",
-      hobby: [], persona: ["funny", "creative"], aesthetic: ["bold"], style: "fun", sentimental: false,
-      desc: "An award-winning board game that's easy to learn and hard to put down." },
-    { title: "Speciality Tea & Coffee Gift Set", retailer: "amazon", price: 24.99, icon: "☕",
-      hobby: ["cooking"], persona: ["foodie", "introvert"], aesthetic: ["cosy"], style: "surprise", sentimental: false,
-      desc: "A curated mix of single-origin coffee and loose-leaf tea." },
-    { title: "Fizzing Bath Bomb Gift Set", retailer: "amazon", price: 18.99, icon: "🛁",
-      hobby: [], persona: ["introvert", "sentimental"], aesthetic: ["cosy", "minimalist"], style: "surprise", sentimental: false,
-      desc: "A set of fragrant bath bombs for slowing down after a long day." },
-    { title: "Weighted Silk Eye Mask", retailer: "amazon", price: 14.99, icon: "😴",
-      hobby: [], persona: ["introvert"], aesthetic: ["cosy", "minimalist"], style: "practical", sentimental: false,
-      desc: "A gently weighted mask that blocks light for deeper, calmer sleep." },
-    { title: "Self-Watering Desk Plant", retailer: "amazon", price: 17.99, icon: "🌿",
-      hobby: ["gardening"], persona: ["outdoorsy", "minimalist"], aesthetic: ["eco", "minimalist"], style: "surprise", sentimental: false,
-      desc: "A low-maintenance plant in a self-watering pot, perfect for any desk." },
-    { title: "Guided Meditation Journal", retailer: "amazon", price: 16.99, icon: "📖",
-      hobby: [], persona: ["introvert", "sentimental"], aesthetic: ["cosy", "minimalist"], style: "sentimental", sentimental: true,
-      desc: "Daily prompts and gratitude pages for a calmer, more reflective routine." },
-    { title: "Insulated Lunch Bag", retailer: "amazon", price: 17.99, icon: "🍱",
-      hobby: [], persona: ["minimalist", "foodie"], aesthetic: ["minimalist", "eco"], style: "practical", sentimental: false,
-      desc: "A smart, leak-proof lunch bag that keeps food fresh on the go." },
-    { title: "Personalised Embroidered Tote Bag", retailer: "etsy", price: 26.0, icon: "👜", genders: ["women"],
-      hobby: ["fashion"], persona: ["sentimental"], aesthetic: ["cosy", "bold"], style: "sentimental", sentimental: true,
-      desc: "A canvas tote embroidered with a name, initials or a small motif." },
-    { title: "Monogrammed Towel Set", retailer: "etsy", price: 32.0, icon: "🛁",
-      hobby: [], persona: ["sentimental"], aesthetic: ["cosy"], style: "sentimental", sentimental: true,
-      desc: "Soft cotton towels embroidered with initials — a small everyday luxury." },
-    { title: "Custom Pet ID Tag", retailer: "etsy", price: 12.0, icon: "🐾",
-      hobby: ["pets"], persona: ["sentimental"], aesthetic: ["minimalist", "bold"], style: "sentimental", sentimental: true,
-      desc: "A durable engraved tag with their pet's name and your contact details." },
-    { title: "Personalised Family Name Sign", retailer: "etsy", price: 30.0, icon: "🏠",
-      hobby: [], persona: ["sentimental"], aesthetic: ["cosy", "vintage"], style: "sentimental", sentimental: true,
-      desc: "A hand-painted wooden sign with a family name and established date." },
-    { title: "Custom Wax Seal Stamp", retailer: "etsy", price: 24.0, icon: "🕯️",
-      hobby: ["art"], persona: ["creative", "sentimental"], aesthetic: ["vintage"], style: "sentimental", sentimental: true,
-      desc: "A brass stamp engraved with initials or a monogram for letters and gifts." },
-    { title: "Personalised Address Stamp", retailer: "etsy", price: 22.0, icon: "📮",
-      hobby: ["diy"], persona: ["sentimental", "minimalist"], aesthetic: ["minimalist", "vintage"], style: "sentimental", sentimental: true,
-      desc: "A custom self-inking stamp with their address, ideal for cards and parcels." },
-    { title: "Custom Birth Chart Print", retailer: "etsy", price: 26.0, icon: "✨",
-      hobby: ["art"], persona: ["sentimental", "creative"], aesthetic: ["vintage", "minimalist"], style: "sentimental", sentimental: true,
-      desc: "A star-chart print showing the sky at the exact moment of their birth." },
-    { title: "Engraved Pocket Compass", retailer: "etsy", price: 24.0, icon: "🧭",
-      hobby: ["travel"], persona: ["sentimental", "adventurous"], aesthetic: ["vintage"], style: "sentimental", sentimental: true,
-      desc: "A working brass compass engraved with a name, date or coordinates." },
-    { title: "Personalised Apron", retailer: "etsy", price: 24.0, icon: "🍳",
-      hobby: ["cooking"], persona: ["sentimental", "foodie"], aesthetic: ["cosy", "vintage"], style: "sentimental", sentimental: true,
-      desc: "A sturdy apron printed or embroidered with a name or favourite title." },
-    { title: "Custom Luggage Tag Set", retailer: "etsy", price: 18.0, icon: "🏷️",
-      hobby: ["travel"], persona: ["sentimental"], aesthetic: ["bold", "vintage"], style: "sentimental", sentimental: true,
-      desc: "Bright, hand-lettered tags that make luggage easy to spot and personal to carry." },
-    { title: "Wooden Name Puzzle", retailer: "etsy", price: 20.0, icon: "🧩",
-      hobby: [], persona: ["sentimental", "creative"], aesthetic: ["eco", "cosy"], style: "sentimental", sentimental: true,
-      desc: "A laser-cut wooden puzzle spelling out a name, made from sustainable timber." },
-    { title: "Engraved Guitar Pick Set", retailer: "etsy", price: 14.0, icon: "🎸",
-      hobby: ["music"], persona: ["sentimental", "creative"], aesthetic: ["vintage"], style: "sentimental", sentimental: true,
-      desc: "A set of metal guitar picks engraved with initials or a short message." },
-    { title: "Custom Coordinates Print", retailer: "etsy", price: 24.0, icon: "📍",
-      hobby: ["art"], persona: ["sentimental", "creative"], aesthetic: ["minimalist", "vintage"], style: "sentimental", sentimental: true,
-      desc: "A map print centred on coordinates that mean something — home, a first date, a proposal spot." },
-    { title: "Personalised Notebook Set", retailer: "etsy", price: 22.0, icon: "📓",
-      hobby: ["reading"], persona: ["sentimental", "bookish"], aesthetic: ["minimalist", "cosy"], style: "sentimental", sentimental: true,
-      desc: "A set of notebooks with a name or monogram foiled onto the cover." },
-    { title: "Custom Illustrated House Portrait", retailer: "etsy", price: 38.0, icon: "🏡",
-      hobby: ["art"], persona: ["sentimental", "creative"], aesthetic: ["bold", "vintage"], style: "sentimental", sentimental: true,
-      desc: "A hand-drawn illustration of their home, made from a photo." },
-    { title: "Engraved Bottle Opener", retailer: "etsy", price: 16.0, icon: "🍾",
-      hobby: [], persona: ["sentimental", "funny"], aesthetic: ["vintage"], style: "sentimental", sentimental: true,
-      desc: "A solid metal bottle opener engraved with a name, date or in-joke." },
-    { title: "Personalised Candle with Label", retailer: "etsy", price: 18.0, icon: "🕯️",
-      hobby: [], persona: ["sentimental", "introvert"], aesthetic: ["cosy"], style: "sentimental", sentimental: true,
-      desc: "A hand-poured candle with a custom label and message, in a scent of choice." },
-    { title: "Custom Pet Bandana", retailer: "etsy", price: 12.0, icon: "🐶",
-      hobby: ["pets"], persona: ["funny", "sentimental"], aesthetic: ["bold", "cosy"], style: "fun", sentimental: false,
-      desc: "A reversible bandana with their pet's name, for walks and photos alike." },
-    { title: "Personalised Kids Name Necklace", retailer: "etsy", price: 18.0, icon: "💛", genders: ["women"],
+      ages: ["adult"], recipients: ["partner", "friend", "sibling", "son"],
+      desc: "A temperature-controlled iron with accessories for electronics and hobby projects." },
+    { title: "Hot Glue Gun Kit", retailer: "amazon", price: 14.99, icon: "🔥",
+      hobby: ["diy"], persona: ["creative"], aesthetic: ["bold", "eco"], style: "fun", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["friend", "sibling", "son", "daughter"],
+      desc: "A glue gun with a rainbow of glue sticks for crafts and quick fixes." },
+    { title: "Label Maker", retailer: "amazon", price: 24.99, icon: "🏷️",
+      hobby: ["diy"], persona: ["minimalist", "techy"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "coworker"],
+      desc: "A compact label printer that makes organising anything satisfying." },
+
+    // ===================== AMAZON — WELLBEING & HOME =====================
+    { title: "Scented Candle Gift Set", retailer: "amazon", price: 22.99, icon: "🕯️",
+      hobby: [], persona: ["introvert"], aesthetic: ["cosy", "minimalist"], style: "surprise", sentimental: false,
+      ages: ["teen", "adult", "senior"], recipients: ["partner", "parent", "friend", "coworker", "sibling"],
+      desc: "Three hand-poured candles in seasonal scents with a long, clean burn." },
+    { title: "Aromatherapy Essential Oil Diffuser", retailer: "amazon", price: 29.99, icon: "🌬️",
+      hobby: [], persona: ["introvert"], aesthetic: ["cosy", "eco"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "friend"],
+      desc: "A calming mist of essential oils to turn any room into a retreat." },
+    { title: "Large Format Jigsaw Puzzle", retailer: "amazon", price: 18.99, icon: "🧩",
+      hobby: [], persona: ["introvert", "creative"], aesthetic: ["cosy", "vintage"], style: "fun", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["parent", "partner", "friend"],
+      desc: "A 1000-piece puzzle featuring a beautiful print — a proper Sunday afternoon project." },
+    { title: "Weighted Eye Mask", retailer: "amazon", price: 19.99, icon: "😴",
+      hobby: [], persona: ["introvert"], aesthetic: ["minimalist", "cosy"], style: "practical", sentimental: false,
+      ages: ["teen", "adult", "senior"], recipients: ["partner", "parent", "friend"],
+      desc: "A gentle, lavender-scented weighted mask for deeper, more restful sleep." },
+    { title: "Electric Foot Spa", retailer: "amazon", price: 44.99, icon: "🦶",
+      hobby: [], persona: ["introvert"], aesthetic: ["cosy"], style: "fun", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["parent", "partner", "friend"],
+      desc: "Heated water jets and a pumice stone for a salon-quality foot soak at home." },
+    { title: "Posture Corrector Brace", retailer: "amazon", price: 22.99, icon: "🏥",
+      hobby: [], persona: [], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["parent", "partner", "coworker"],
+      desc: "A discreet, breathable brace that gently trains better posture throughout the day." },
+    { title: "Himalayan Salt Lamp", retailer: "amazon", price: 24.99, icon: "🌟",
+      hobby: [], persona: ["introvert"], aesthetic: ["cosy", "eco"], style: "fun", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "friend"],
+      desc: "A warm amber glow from a hand-carved salt crystal that doubles as mood lighting." },
+    { title: "Smart LED Colour-Changing Bulbs", retailer: "amazon", price: 29.99, icon: "💡",
+      hobby: [], persona: ["techy", "creative"], aesthetic: ["bold", "minimalist"], style: "fun", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling", "son", "daughter"],
+      desc: "App-controlled bulbs that set the scene for work, movies or relaxing." },
+
+    // ===================== AMAZON — KIDS & YOUNG =====================
+    { title: "LEGO Classic Brick Box", retailer: "amazon", price: 34.99, icon: "🧱",
+      hobby: ["art", "diy"], persona: ["creative"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["child"], recipients: ["son", "daughter", "sibling", "friend"],
+      desc: "A classic tub of bricks in every colour for open-ended building adventures." },
+    { title: "Science Experiment Kit for Kids", retailer: "amazon", price: 24.99, icon: "🧪",
+      hobby: ["diy"], persona: ["techy", "creative"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["child"], recipients: ["son", "daughter", "sibling", "friend"],
+      desc: "Over 30 safe, exciting experiments that make chemistry feel like magic." },
+    { title: "Remote Control Monster Truck", retailer: "amazon", price: 29.99, icon: "🚗",
+      hobby: ["gaming"], persona: ["adventurous", "funny"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["child"], recipients: ["son", "daughter", "sibling", "friend"],
+      desc: "A rugged RC truck that handles rough terrain, grass and ramps at speed." },
+    { title: "Illustrated Children's Book Bundle", retailer: "amazon", price: 19.99, icon: "📚",
+      hobby: ["reading"], persona: ["bookish"], aesthetic: ["cosy", "bold"], style: "fun", sentimental: false,
+      ages: ["child"], recipients: ["son", "daughter", "sibling", "friend"],
+      desc: "A set of beautifully illustrated picture books that spark imagination." },
+    { title: "Art & Craft Activity Set", retailer: "amazon", price: 22.99, icon: "✂️",
+      hobby: ["art"], persona: ["creative"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["child"], recipients: ["son", "daughter", "sibling", "friend"],
+      desc: "Stickers, stamps, paints and craft supplies for hours of creative play." },
+    { title: "Kids Coding Robot", retailer: "amazon", price: 39.99, icon: "🤖",
+      hobby: ["gaming", "diy"], persona: ["techy", "creative"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["child", "teen"], recipients: ["son", "daughter", "sibling", "friend"],
+      desc: "A programmable robot that teaches logic and coding through play — no screens needed." },
+    { title: "Magnetic Tiles Building Set", retailer: "amazon", price: 32.99, icon: "🔷",
+      hobby: ["art", "diy"], persona: ["creative"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["child"], recipients: ["son", "daughter", "sibling", "friend"],
+      desc: "Colourful magnetic tiles that snap together to build everything from towers to cars." },
+    { title: "Indoor Kids Trampoline", retailer: "amazon", price: 49.99, icon: "🤸",
+      hobby: ["sports"], persona: ["adventurous", "funny"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["child"], recipients: ["son", "daughter", "sibling"],
+      desc: "A compact, spring-free mini trampoline with a safety handle for indoor bouncing." },
+    { title: "Kids Walkie-Talkies Set", retailer: "amazon", price: 22.99, icon: "📻",
+      hobby: [], persona: ["adventurous", "funny"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["child"], recipients: ["son", "daughter", "sibling", "friend"],
+      desc: "Durable, long-range walkie-talkies for adventures around the house and garden." },
+    { title: "Glow-in-the-Dark Star Ceiling Kit", retailer: "amazon", price: 14.99, icon: "⭐",
+      hobby: [], persona: ["creative"], aesthetic: ["bold", "cosy"], style: "fun", sentimental: false,
+      ages: ["child", "teen"], recipients: ["son", "daughter", "sibling"],
+      desc: "Hundreds of phosphorescent stars and moon shapes that light up the bedroom ceiling." },
+    { title: "Kids Waterproof Camera", retailer: "amazon", price: 39.99, icon: "📷",
+      hobby: ["photography"], persona: ["creative", "adventurous"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["child"], recipients: ["son", "daughter", "sibling", "friend"],
+      desc: "A tough, drop-proof, waterproof camera designed specifically for little adventurers." },
+    { title: "Beginner Guitar", retailer: "amazon", price: 79.99, icon: "🎸",
+      hobby: ["music"], persona: ["creative"], aesthetic: ["vintage"], style: "fun", sentimental: false,
+      ages: ["child", "teen"], recipients: ["son", "daughter", "sibling", "friend"],
+      desc: "A properly set-up, full starter guitar that makes learning actually fun." },
+
+    // ===================== AMAZON — TEENS =====================
+    { title: "Spotify Premium Gift Card", retailer: "amazon", price: 30.0, icon: "🎵",
+      hobby: ["music"], persona: ["techy", "creative"], aesthetic: ["minimalist", "bold"], style: "surprise", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["son", "daughter", "sibling", "friend"],
+      desc: "Months of ad-free music, podcasts and audiobooks on any device." },
+    { title: "Portable LED Ring Light", retailer: "amazon", price: 24.99, icon: "💡",
+      hobby: ["photography", "art"], persona: ["creative"], aesthetic: ["bold", "minimalist"], style: "fun", sentimental: false,
+      ages: ["teen"], recipients: ["son", "daughter", "sibling", "friend"],
+      desc: "A tripod ring light perfect for video calls, selfies and content creation." },
+    { title: "Popcorn Machine", retailer: "amazon", price: 32.99, icon: "🍿",
+      hobby: ["movies"], persona: ["funny", "foodie"], aesthetic: ["vintage"], style: "fun", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["son", "daughter", "sibling", "friend"],
+      desc: "A retro countertop popcorn maker that serves up cinema-style popcorn in minutes." },
+    { title: "Mini Fridge for Bedroom", retailer: "amazon", price: 59.99, icon: "❄️",
+      hobby: [], persona: ["introvert"], aesthetic: ["minimalist", "bold"], style: "fun", sentimental: false,
+      ages: ["teen"], recipients: ["son", "daughter", "sibling"],
+      desc: "A compact, quiet 4L fridge that keeps drinks and snacks cold at their desk." },
+    { title: "Gel Nail Starter Kit", retailer: "amazon", price: 39.99, icon: "💅", genders: ["women"],
+      hobby: ["fashion", "art"], persona: ["creative"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["daughter", "sibling", "friend"],
+      desc: "A UV lamp, gel polishes and tools for salon-quality nails at home." },
+    { title: "Skincare Starter Set", retailer: "amazon", price: 34.99, icon: "🧴",
+      hobby: ["fashion"], persona: ["introvert", "creative"], aesthetic: ["minimalist", "eco"], style: "surprise", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["daughter", "sibling", "friend"],
+      desc: "A beginner-friendly routine set: cleanser, toner, moisturiser and SPF." },
+
+    // ===================== AMAZON — SENIORS =====================
+    { title: "Large-Button Digital Photo Frame", retailer: "amazon", price: 44.99, icon: "🖼️",
+      hobby: [], persona: ["sentimental"], aesthetic: ["cosy", "minimalist"], style: "sentimental", sentimental: true,
+      ages: ["senior"], recipients: ["parent", "partner"],
+      desc: "A Wi-Fi frame that family can send photos to directly from their phones." },
+    { title: "Talking Audiobook Player", retailer: "amazon", price: 54.99, icon: "📻",
+      hobby: ["reading"], persona: ["bookish", "introvert"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["senior"], recipients: ["parent", "partner"],
+      desc: "A simple, large-button player preloaded with audiobooks — no phone required." },
+    { title: "Magnifying Reading Glasses Set", retailer: "amazon", price: 16.99, icon: "👓",
+      hobby: ["reading"], persona: [], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["senior"], recipients: ["parent", "partner"],
+      desc: "A set of readers in different strengths, stashed around the house and handbag." },
+    { title: "Cosy Fleece Blanket", retailer: "amazon", price: 22.99, icon: "🧣",
+      hobby: [], persona: ["introvert"], aesthetic: ["cosy"], style: "surprise", sentimental: false,
+      ages: ["senior", "adult"], recipients: ["parent", "partner"],
+      desc: "An incredibly soft, generous-sized fleece blanket in a beautiful neutral tone." },
+    { title: "Digital Blood Pressure Monitor", retailer: "amazon", price: 29.99, icon: "💉",
+      hobby: [], persona: [], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["senior"], recipients: ["parent", "partner"],
+      desc: "A clinically accurate arm-cuff monitor with a large display and memory storage." },
+    { title: "Pill Organiser with Alarm", retailer: "amazon", price: 18.99, icon: "💊",
+      hobby: [], persona: [], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["senior"], recipients: ["parent", "partner"],
+      desc: "A weekly organiser with a built-in alarm to never miss a dose." },
+    { title: "Easy Grip Walking Stick", retailer: "amazon", price: 24.99, icon: "🦯",
+      hobby: [], persona: [], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["senior"], recipients: ["parent", "partner"],
+      desc: "A lightweight, height-adjustable folding stick with a comfortable foam handle." },
+    { title: "Knitting Starter Kit", retailer: "amazon", price: 28.99, icon: "🧶",
+      hobby: ["art"], persona: ["creative", "introvert"], aesthetic: ["cosy", "vintage"], style: "fun", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["parent", "partner", "friend"],
+      desc: "Needles, colourful yarns and a beginner pattern book for a cosy new hobby." },
+    { title: "Crossword Puzzle Book Collection", retailer: "amazon", price: 12.99, icon: "📰",
+      hobby: ["reading"], persona: ["bookish"], aesthetic: ["vintage"], style: "fun", sentimental: false,
+      ages: ["senior", "adult"], recipients: ["parent", "partner", "friend"],
+      desc: "A bumper collection of crosswords, sudoku and word puzzles to fill spare hours." },
+    { title: "Garden Kneeling Pad", retailer: "amazon", price: 14.99, icon: "🌱",
+      hobby: ["gardening"], persona: ["outdoorsy"], aesthetic: ["eco"], style: "practical", sentimental: false,
+      ages: ["senior", "adult"], recipients: ["parent", "partner"],
+      desc: "A thick, waterproof foam pad that cushions knees during gardening sessions." },
+    { title: "Thermal Flask Gift Set", retailer: "amazon", price: 28.99, icon: "☕",
+      hobby: [], persona: ["introvert", "outdoorsy"], aesthetic: ["cosy", "minimalist"], style: "surprise", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["parent", "partner", "friend", "coworker"],
+      desc: "A matching flask and travel mug set that keeps hot drinks hot for 12 hours." },
+    { title: "Book of World Records Annual", retailer: "amazon", price: 14.99, icon: "📖",
+      hobby: ["reading"], persona: ["funny", "bookish"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["child", "teen", "adult", "senior"], recipients: ["son", "daughter", "parent", "sibling", "friend"],
+      desc: "The latest annual edition, packed with astonishing facts and incredible photos." },
+
+    // ===================== AMAZON — COWORKER / NEUTRAL =====================
+    { title: "Premium Desk Organiser", retailer: "amazon", price: 27.99, icon: "🗂️",
+      hobby: [], persona: ["minimalist"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["adult"], recipients: ["coworker", "friend"],
+      desc: "A sleek bamboo tray that keeps pens, cables and sticky notes in check." },
+    { title: "Personalised Mug", retailer: "amazon", price: 12.99, icon: "☕",
+      hobby: [], persona: ["funny", "sentimental"], aesthetic: ["cosy", "bold"], style: "fun", sentimental: false,
+      ages: ["teen", "adult", "senior"], recipients: ["coworker", "friend", "parent"],
+      desc: "A quality ceramic mug with a custom message or design that they'll use every morning." },
+    { title: "Premium Notebook and Pen Set", retailer: "amazon", price: 22.99, icon: "📓",
+      hobby: ["reading", "art"], persona: ["minimalist", "bookish"], aesthetic: ["minimalist", "vintage"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["coworker", "friend", "sibling"],
+      desc: "A hardback dotted notebook and a smooth rollerball pen — the professional's essential." },
+    { title: "Wireless Charging Pad", retailer: "amazon", price: 19.99, icon: "📲",
+      hobby: [], persona: ["techy", "minimalist"], aesthetic: ["minimalist"], style: "practical", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling", "coworker"],
+      desc: "A slim, fast-charging pad that tidies up the desk and keeps devices topped up." },
+    { title: "Stress Relief Fidget Cube", retailer: "amazon", price: 11.99, icon: "🎲",
+      hobby: [], persona: ["introvert", "techy"], aesthetic: ["minimalist"], style: "fun", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["friend", "coworker", "sibling"],
+      desc: "Six sides of satisfying fidgets — buttons, dials, switches — for anxious hands." },
+
+    // ===================== ETSY (PERSONALISED PICKS) =====================
+    { title: "Personalised Name Necklace", retailer: "etsy", price: 22.0, icon: "💛", genders: ["women"],
       hobby: ["fashion"], persona: ["sentimental"], aesthetic: ["minimalist", "bold"], style: "sentimental", sentimental: true,
-      desc: "A delicate name necklace, gentle on skin and sized for younger wearers." },
-    { title: "Engraved Golf Ball Set", retailer: "etsy", price: 26.0, icon: "⛳",
-      hobby: ["sports"], persona: ["sentimental", "outdoorsy"], aesthetic: ["vintage", "minimalist"], style: "sentimental", sentimental: true,
-      desc: "A set of golf balls engraved with initials or a short message." },
-    { title: "Monogram Wax Seal Kit", retailer: "etsy", price: 20.0, icon: "🕯️",
-      hobby: ["art"], persona: ["creative"], aesthetic: ["vintage"], style: "fun", sentimental: false,
-      desc: "A full wax-sealing kit with stamp, wax sticks and melting spoon." },
-    { title: "Personalised Recipe Card Box", retailer: "etsy", price: 28.0, icon: "🗃️",
+      ages: ["teen", "adult"], recipients: ["partner", "daughter", "sibling", "friend"],
+      desc: "A dainty, handmade necklace featuring their name in delicate lettering." },
+    { title: "Custom Star Map Print", retailer: "etsy", price: 28.0, icon: "🌌",
+      hobby: ["art"], persona: ["creative", "sentimental"], aesthetic: ["vintage", "minimalist"], style: "sentimental", sentimental: true,
+      ages: ["teen", "adult", "senior"], recipients: ["partner", "parent", "friend"],
+      desc: "The night sky from a date that matters, printed as framed wall art." },
+    { title: "Personalised Engraved Leather Wallet", retailer: "etsy", price: 35.0, icon: "👝",
+      hobby: ["fashion"], persona: ["sentimental", "minimalist"], aesthetic: ["vintage"], style: "sentimental", sentimental: true,
+      ages: ["adult"], recipients: ["partner", "parent", "sibling", "son"],
+      desc: "A handcrafted leather wallet engraved with their initials or a short message." },
+    { title: "Custom Illustrated Pet Portrait", retailer: "etsy", price: 32.0, icon: "🐾",
+      hobby: ["pets", "art"], persona: ["sentimental", "creative"], aesthetic: ["bold", "vintage"], style: "sentimental", sentimental: true,
+      ages: ["adult"], recipients: ["partner", "parent", "friend"],
+      desc: "A hand-illustrated portrait of their pet, made from a favourite photo." },
+    { title: "Personalised Photo Memory Book", retailer: "etsy", price: 30.0, icon: "📔",
+      hobby: ["photography", "travel"], persona: ["sentimental"], aesthetic: ["cosy", "vintage"], style: "sentimental", sentimental: true,
+      ages: ["teen", "adult", "senior"], recipients: ["partner", "parent", "friend", "sibling"],
+      desc: "A beautifully printed photo book telling the story of shared memories." },
+    { title: "Engraved Wooden Cutting Board", retailer: "etsy", price: 28.0, icon: "🪵",
       hobby: ["cooking"], persona: ["sentimental", "foodie"], aesthetic: ["cosy", "vintage"], style: "sentimental", sentimental: true,
-      desc: "A wooden box with custom recipe cards, ready to fill with family favourites." },
-    { title: "Engraved Money Clip", retailer: "etsy", price: 22.0, icon: "💵", genders: ["men"],
-      hobby: ["fashion"], persona: ["sentimental", "minimalist"], aesthetic: ["minimalist", "vintage"], style: "sentimental", sentimental: true,
-      desc: "A slim metal money clip engraved with initials, a date or coordinates." },
-    { title: "Personalised Yoga Mat", retailer: "etsy", price: 34.0, icon: "🧘",
-      hobby: ["gym", "sports"], persona: ["sentimental", "outdoorsy"], aesthetic: ["minimalist", "bold"], style: "sentimental", sentimental: true,
-      desc: "A high-grip yoga mat printed with a name or meaningful design." },
-    { title: "Custom Embroidered Baby Blanket", retailer: "etsy", price: 30.0, icon: "👶",
-      hobby: [], persona: ["sentimental"], aesthetic: ["cosy"], style: "sentimental", sentimental: true,
-      desc: "A soft blanket embroidered with a name and birth date — a keepsake from day one." }
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "sibling"],
+      desc: "A handsome oak board engraved with their name, a date, or a family recipe." },
+    { title: "Personalised Cufflinks", retailer: "etsy", price: 24.0, icon: "🎩", genders: ["men"],
+      hobby: ["fashion"], persona: ["sentimental", "minimalist"], aesthetic: ["vintage"], style: "sentimental", sentimental: true,
+      ages: ["adult"], recipients: ["partner", "parent", "sibling", "coworker"],
+      desc: "Engraved cufflinks with initials, coordinates, or a hidden handwritten note." },
+    { title: "Custom Family Tree Print", retailer: "etsy", price: 26.0, icon: "🌳",
+      hobby: ["art"], persona: ["sentimental"], aesthetic: ["vintage", "cosy"], style: "sentimental", sentimental: true,
+      ages: ["adult", "senior"], recipients: ["parent", "partner"],
+      desc: "A hand-drawn family tree print personalised with names and dates." },
+    { title: "Birth Flower Necklace", retailer: "etsy", price: 20.0, icon: "🌷", genders: ["women"],
+      hobby: ["fashion"], persona: ["sentimental"], aesthetic: ["minimalist", "bold"], style: "sentimental", sentimental: true,
+      ages: ["teen", "adult"], recipients: ["partner", "daughter", "sibling", "friend"],
+      desc: "A delicate pendant featuring the flower associated with their birth month." },
+    { title: "Personalised Recipe Blanket", retailer: "etsy", price: 45.0, icon: "🧶",
+      hobby: ["cooking"], persona: ["sentimental", "foodie"], aesthetic: ["cosy"], style: "sentimental", sentimental: true,
+      ages: ["adult", "senior"], recipients: ["partner", "parent"],
+      desc: "A soft woven blanket printed with a treasured family recipe, in their handwriting if you like." },
+    { title: "Custom Song Lyrics Print", retailer: "etsy", price: 24.0, icon: "🎼",
+      hobby: ["music", "art"], persona: ["sentimental", "creative"], aesthetic: ["minimalist", "vintage"], style: "sentimental", sentimental: true,
+      ages: ["teen", "adult"], recipients: ["partner", "sibling", "friend"],
+      desc: "A meaningful lyric or sound-wave print from a song that matters to them." },
+    { title: "Personalised Leather Journal", retailer: "etsy", price: 26.0, icon: "📓",
+      hobby: ["reading", "art"], persona: ["sentimental", "bookish"], aesthetic: ["vintage", "cosy"], style: "sentimental", sentimental: true,
+      ages: ["teen", "adult", "senior"], recipients: ["partner", "parent", "friend"],
+      desc: "A hand-bound leather journal embossed with their name or initials." },
+    { title: "Engraved Whisky Glasses Set", retailer: "etsy", price: 32.0, icon: "🥃",
+      hobby: [], persona: ["sentimental", "foodie"], aesthetic: ["vintage"], style: "sentimental", sentimental: true,
+      ages: ["adult"], recipients: ["partner", "parent", "sibling", "friend"],
+      desc: "A pair of glasses etched with initials, coordinates, or a special date." },
+    { title: "Custom Embroidered Hoodie", retailer: "etsy", price: 38.0, icon: "🧥",
+      hobby: ["fashion"], persona: ["sentimental"], aesthetic: ["cosy", "bold"], style: "sentimental", sentimental: true,
+      ages: ["teen", "adult"], recipients: ["partner", "sibling", "friend", "son", "daughter"],
+      desc: "A cosy hoodie embroidered with a name, date, or in-joke." },
+    { title: "Personalised Phone Case", retailer: "etsy", price: 18.0, icon: "📱",
+      hobby: ["fashion", "photography"], persona: ["sentimental", "creative"], aesthetic: ["bold", "minimalist"], style: "sentimental", sentimental: true,
+      ages: ["teen", "adult"], recipients: ["partner", "sibling", "friend", "son", "daughter"],
+      desc: "A custom-printed phone case featuring a photo, name or design of their choice." },
+    { title: "Custom Illustrated Couple Portrait", retailer: "etsy", price: 40.0, icon: "💑",
+      hobby: ["art"], persona: ["sentimental", "creative"], aesthetic: ["bold", "vintage"], style: "sentimental", sentimental: true,
+      ages: ["adult"], recipients: ["partner"],
+      desc: "A hand-drawn portrait capturing the two of you in a chosen scene or style." },
+    { title: "Memory Jar Kit with Prompt Cards", retailer: "etsy", price: 22.0, icon: "🫙",
+      hobby: [], persona: ["sentimental", "introvert"], aesthetic: ["cosy", "vintage"], style: "sentimental", sentimental: true,
+      ages: ["teen", "adult", "senior"], recipients: ["partner", "parent", "friend"],
+      desc: "A keepsake jar with prompt cards for notes, tickets and memories to open later." },
+    { title: "Personalised Engraved Keyring", retailer: "etsy", price: 14.0, icon: "🔑",
+      hobby: [], persona: ["sentimental", "minimalist"], aesthetic: ["minimalist"], style: "sentimental", sentimental: true,
+      ages: ["teen", "adult", "senior"], recipients: ["partner", "parent", "friend", "sibling", "coworker"],
+      desc: "A small everyday keepsake engraved with a name, date or short message." },
+    { title: "Custom Enamel Pin", retailer: "etsy", price: 10.0, icon: "📌",
+      hobby: ["art", "fashion"], persona: ["creative", "funny"], aesthetic: ["bold"], style: "fun", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["friend", "sibling", "son", "daughter"],
+      desc: "A playful custom-designed enamel pin for a jacket, bag or pinboard." },
+    { title: "Birthstone Bracelet", retailer: "etsy", price: 28.0, icon: "💎", genders: ["women"],
+      hobby: ["fashion"], persona: ["sentimental"], aesthetic: ["minimalist", "bold"], style: "sentimental", sentimental: true,
+      ages: ["teen", "adult"], recipients: ["partner", "daughter", "sibling", "friend"],
+      desc: "A delicate bracelet featuring their birthstone, handmade to order." },
+    { title: "Personalised Children's Storybook", retailer: "etsy", price: 22.0, icon: "📖",
+      hobby: ["reading"], persona: ["sentimental"], aesthetic: ["cosy", "bold"], style: "sentimental", sentimental: true,
+      ages: ["child"], recipients: ["son", "daughter", "sibling", "friend"],
+      desc: "A professionally printed book starring them as the hero — with their name and likeness on every page." },
+    { title: "Custom Name Puzzle", retailer: "etsy", price: 18.0, icon: "🧩",
+      hobby: ["art"], persona: ["creative"], aesthetic: ["bold", "cosy"], style: "fun", sentimental: true,
+      ages: ["child"], recipients: ["son", "daughter", "sibling", "friend"],
+      desc: "A wooden jigsaw with their name cut into the pieces — great for learning and keepsaking." },
+    { title: "Embroidered Birth Stats Hoop", retailer: "etsy", price: 24.0, icon: "🌟",
+      hobby: ["art"], persona: ["sentimental"], aesthetic: ["vintage", "cosy"], style: "sentimental", sentimental: true,
+      ages: ["child"], recipients: ["son", "daughter"],
+      desc: "A handmade embroidery hoop recording their birth date, weight and time in delicate thread." },
+    { title: "Personalised Grandparent Book", retailer: "etsy", price: 20.0, icon: "📘",
+      hobby: ["reading"], persona: ["sentimental", "bookish"], aesthetic: ["cosy", "vintage"], style: "sentimental", sentimental: true,
+      ages: ["senior"], recipients: ["parent"],
+      desc: "A fill-in-the-blank memoir book for grandparents to record their stories for future generations." },
+    { title: "Custom Map Print of a Special Place", retailer: "etsy", price: 26.0, icon: "🗺️",
+      hobby: ["travel", "art"], persona: ["sentimental", "creative"], aesthetic: ["vintage", "minimalist"], style: "sentimental", sentimental: true,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "friend"],
+      desc: "A beautifully styled map print of a city, town or location that means something to them." },
+    { title: "Handmade Soy Wax Candle", retailer: "etsy", price: 16.0, icon: "🕯️",
+      hobby: [], persona: ["introvert"], aesthetic: ["cosy", "eco"], style: "surprise", sentimental: false,
+      ages: ["teen", "adult", "senior"], recipients: ["partner", "parent", "friend", "sibling", "coworker"],
+      desc: "A hand-poured, small-batch soy candle in a seasonal or custom scent." },
+    { title: "Personalised Book Embosser Stamp", retailer: "etsy", price: 28.0, icon: "📚",
+      hobby: ["reading"], persona: ["bookish", "creative"], aesthetic: ["vintage", "minimalist"], style: "sentimental", sentimental: true,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "friend"],
+      desc: "A beautiful brass embosser that stamps an 'ex libris' plate into every book they own." },
+    { title: "Custom Pet Name Collar", retailer: "etsy", price: 14.0, icon: "🐕",
+      hobby: ["pets"], persona: ["sentimental"], aesthetic: ["bold", "eco"], style: "sentimental", sentimental: true,
+      ages: ["adult"], recipients: ["partner", "parent", "friend"],
+      desc: "A hand-engraved or embroidered collar featuring their pet's name and a design they'll love." },
+    { title: "Personalised Gin or Whisky Label Kit", retailer: "etsy", price: 18.0, icon: "🥃",
+      hobby: ["cooking"], persona: ["funny", "creative"], aesthetic: ["vintage", "bold"], style: "fun", sentimental: false,
+      ages: ["adult"], recipients: ["partner", "friend", "sibling", "parent"],
+      desc: "Custom-printed bottle labels to transform any supermarket spirit into a thoughtful gift." },
+
+    // ===================== EXPERIENCES & SUBSCRIPTIONS =====================
+    { title: "Movie Night Gift Hamper", retailer: "amazon", price: 34.99, icon: "🎬",
+      hobby: ["movies"], persona: ["introvert", "funny"], aesthetic: ["cosy"], style: "surprise", sentimental: false,
+      ages: ["teen", "adult", "senior"], recipients: ["partner", "parent", "friend", "sibling"],
+      desc: "Popcorn, hot chocolate, cosy socks and a streaming gift card — the ultimate movie kit." },
+    { title: "Cocktail Recipe Book", retailer: "amazon", price: 16.99, icon: "📖",
+      hobby: ["cooking"], persona: ["foodie", "creative"], aesthetic: ["bold", "vintage"], style: "fun", sentimental: false,
+      ages: ["adult"], recipients: ["partner", "friend", "sibling", "parent"],
+      desc: "A beautifully styled guide to over 200 classic and modern cocktails." },
+    { title: "Coffee Subscription (3 Months)", retailer: "amazon", price: 49.99, icon: "☕",
+      hobby: ["cooking"], persona: ["foodie"], aesthetic: ["minimalist"], style: "surprise", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "coworker", "friend"],
+      desc: "Freshly roasted single-origin beans from around the world delivered monthly." },
+    { title: "Grow-Your-Own Chilli Kit", retailer: "amazon", price: 19.99, icon: "🌶️",
+      hobby: ["gardening", "cooking"], persona: ["foodie", "creative"], aesthetic: ["eco", "bold"], style: "fun", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "friend"],
+      desc: "Seeds, compost and a terracotta pot to grow seriously hot chillies from scratch." },
+    { title: "Giant Garden Jenga", retailer: "amazon", price: 29.99, icon: "🪵",
+      hobby: ["sports"], persona: ["funny", "adventurous"], aesthetic: ["eco"], style: "fun", sentimental: false,
+      ages: ["child", "teen", "adult", "senior"], recipients: ["partner", "parent", "sibling", "friend"],
+      desc: "A huge outdoor stacking game that gets more chaotic — and more fun — as it grows." },
+    { title: "Watercolour Painting by Number Kit", retailer: "amazon", price: 22.99, icon: "🖼️",
+      hobby: ["art"], persona: ["creative", "introvert"], aesthetic: ["cosy", "vintage"], style: "fun", sentimental: false,
+      ages: ["adult", "senior"], recipients: ["partner", "parent", "friend"],
+      desc: "A satisfying painting kit that guides them through a beautiful watercolour without art skills." },
+    { title: "Travel Scratch-Off World Map", retailer: "amazon", price: 17.99, icon: "🗺️",
+      hobby: ["travel"], persona: ["adventurous", "creative"], aesthetic: ["vintage", "bold"], style: "fun", sentimental: false,
+      ages: ["teen", "adult"], recipients: ["partner", "friend", "sibling"],
+      desc: "A gold-foil scratch-off map to reveal the countries they've visited — and dream of next." },
+    { title: "Self-Care Hamper", retailer: "amazon", price: 44.99, icon: "🛁",
+      hobby: [], persona: ["introvert"], aesthetic: ["cosy", "eco"], style: "surprise", sentimental: false,
+      ages: ["teen", "adult", "senior"], recipients: ["partner", "parent", "friend", "sibling"],
+      desc: "Bath salts, a face mask, a candle and a soft cloth — the full pamper package." },
   ];
-
-  function hashStr(str) {
-    var h = 0;
-    for (var i = 0; i < str.length; i++) {
-      h = (h * 31 + str.charCodeAt(i)) >>> 0;
-    }
-    return h % 1000;
-  }
-
-  /* Custom flat-illustration category artwork (hand-drawn in the brand
-     palette), used as each gift card's product image. */
   var CATEGORY_IMAGES = {
     "gym": "data:image/png;base64,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",
     "gaming": "data:image/png;base64,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",
@@ -1381,6 +1729,24 @@
 
       var score = matchedHobbies.length * 4 + matchedPersonas.length * 2.5;
       if (matchedAesthetic) score += 2;
+
+      // Age relevance scoring
+      if (Array.isArray(g.ages) && g.ages.length && ans.age) {
+        if (g.ages.indexOf(ans.age) !== -1) {
+          score += 3; // strong boost for age-appropriate gifts
+        } else {
+          score -= 2; // penalise age mismatches
+        }
+      }
+
+      // Recipient relevance scoring
+      if (Array.isArray(g.recipients) && g.recipients.length && ans.recipient) {
+        if (g.recipients.indexOf(ans.recipient) !== -1) {
+          score += 2.5; // boost for recipient-specific gifts
+        } else {
+          score -= 1;
+        }
+      }
 
       if (style === "surprise") {
         score += 1; // anything goes
@@ -1532,8 +1898,112 @@
      9. RESULTS RENDERING
      ======================================================= */
   var grid = $("#results-grid");
+  var allIdeas = []; // master list of all ideas loaded so far
+  var activeFilter = "all"; // "all" | "amazon" | "etsy" | "sentimental" | "practical" | "fun"
+  var activeSort = "match"; // "match" | "price-asc" | "price-desc"
+
+  function parsePrice(priceStr) {
+    if (!priceStr) return 0;
+    var match = String(priceStr).match(/[\d.]+/);
+    return match ? parseFloat(match[0]) : 0;
+  }
+
+  function getFilteredSorted() {
+    var filtered = allIdeas.filter(function (g) {
+      if (activeFilter === "all") return true;
+      if (activeFilter === "amazon") return g.retailer === "amazon";
+      if (activeFilter === "etsy") return g.retailer === "etsy";
+      if (activeFilter === "sentimental") return g.why_it_matches && g.why_it_matches.toLowerCase().indexOf("heartfelt") !== -1 || (g.retailer === "etsy");
+      if (activeFilter === "practical") return g.why_it_matches && (g.why_it_matches.toLowerCase().indexOf("practical") !== -1 || g.why_it_matches.toLowerCase().indexOf("useful") !== -1);
+      if (activeFilter === "under20") return parsePrice(g.price_range) < 20;
+      if (activeFilter === "under50") return parsePrice(g.price_range) < 50;
+      return true;
+    });
+
+    if (activeSort === "price-asc") {
+      filtered = filtered.slice().sort(function (a, b) {
+        return parsePrice(a.price_range) - parsePrice(b.price_range);
+      });
+    } else if (activeSort === "price-desc") {
+      filtered = filtered.slice().sort(function (a, b) {
+        return parsePrice(b.price_range) - parsePrice(a.price_range);
+      });
+    }
+    // "match" keeps original order
+
+    return filtered;
+  }
+
+  function renderFilterSort() {
+    var bar = $("#results-filter-bar");
+    if (!bar) return;
+
+    var filters = [
+      { value: "all", label: "All" },
+      { value: "amazon", label: "🛒 Amazon" },
+      { value: "etsy", label: "🎨 Etsy" },
+      { value: "under20", label: "Under £20" },
+      { value: "under50", label: "Under £50" }
+    ];
+
+    var sorts = [
+      { value: "match", label: "Best Match" },
+      { value: "price-asc", label: "Price: Low–High" },
+      { value: "price-desc", label: "Price: High–Low" }
+    ];
+
+    var filterHtml = filters.map(function (f) {
+      return '<button class="filter-chip' + (activeFilter === f.value ? " is-active" : "") + '" data-filter="' + f.value + '">' + f.label + '</button>';
+    }).join("");
+
+    var sortHtml = '<select class="sort-select" id="sort-select">' +
+      sorts.map(function (s) {
+        return '<option value="' + s.value + '"' + (activeSort === s.value ? " selected" : "") + '>' + s.label + '</option>';
+      }).join("") +
+      '</select>';
+
+    bar.innerHTML =
+      '<div class="filter-bar__filters">' + filterHtml + '</div>' +
+      '<div class="filter-bar__sort"><span class="filter-bar__sort-label">Sort:</span>' + sortHtml + '</div>';
+
+    // Wire filter chips
+    $all(".filter-chip", bar).forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        activeFilter = btn.getAttribute("data-filter");
+        renderFilterSort();
+        refreshGrid();
+      });
+    });
+
+    // Wire sort select
+    var sortSel = $("#sort-select");
+    if (sortSel) {
+      sortSel.addEventListener("change", function () {
+        activeSort = sortSel.value;
+        refreshGrid();
+      });
+    }
+  }
+
+  function refreshGrid() {
+    var visible = getFilteredSorted();
+    grid.innerHTML = "";
+    if (!visible.length) {
+      grid.innerHTML = '<div class="notice" style="grid-column:1/-1"><p>No gifts match this filter — try a different one.</p></div>';
+    } else {
+      visible.forEach(function (gift, i) {
+        grid.appendChild(buildCard(gift, i));
+      });
+    }
+    $("#results-count").textContent = visible.length;
+  }
 
   function renderResults(ideas, ans) {
+    /* Reset filter/sort state on fresh results */
+    allIdeas = ideas.slice();
+    activeFilter = "all";
+    activeSort = "match";
+
     /* summary chips */
     var summaryTags = $("#summary-tags");
     var parts = [];
@@ -1563,6 +2033,9 @@
       .join("");
 
     $("#results-count").textContent = ideas.length;
+
+    // Render filter/sort bar
+    renderFilterSort();
 
     grid.innerHTML = "";
     ideas.forEach(function (gift, i) {
@@ -1752,11 +2225,13 @@
           return;
         }
         var startIndex = grid.children.length;
+        allIdeas = allIdeas.concat(ideas);
         ideas.forEach(function (gift, i) {
           grid.appendChild(buildCard(gift, startIndex + i));
         });
         shownTitles = shownTitles.concat(ideas.map(function (g) { return g.title; }));
-        $("#results-count").textContent = grid.children.length;
+        $("#results-count").textContent = getFilteredSorted().length;
+        renderFilterSort();
         btn.disabled = false;
         btn.textContent = "Show More Ideas";
       })
@@ -1832,6 +2307,8 @@
   function validAnswers(ans) {
     if (!ans || typeof ans !== "object") return false;
     return QUESTIONS.every(function (q) {
+      // Optional questions can be skipped
+      if (q.optional) return true;
       if (q.type === "multi") {
         return Array.isArray(ans[q.id]) && ans[q.id].length > 0;
       }
